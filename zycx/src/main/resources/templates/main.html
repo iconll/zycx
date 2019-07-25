@@ -1,0 +1,92 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:include="include/includebase_main">
+</head>
+<body>
+<script th:inline="javascript">
+    $(function () {
+        // 初始化nav
+        $.fn.bootstrapNav({index:'main',navTitle:'支用查询系统'});
+        // 初始化标签页
+        $("#tabContainer").tabs({
+            data: [{
+                id: '99999999',
+                text: '首页',
+                url: "home",
+                closeable: false
+            }],
+            showIndex: 0,
+            loadAll: false
+        })
+        //渲染菜单Tree
+        $.fn.bootstrapTree({url:"/user/mainTree",treeId:'menu_tree',tabId:"tabContainer"});
+
+        $.fn.dictUtil("/dict/loadDict");
+    });
+    function toUpdatePwd(){
+        //window.Ewin.dialog({title:"修改",url:"/updatePwd",width:400,height:395});
+        layer.open({
+            type: 2,
+            title: "修改密码",
+            area: ['450px', '460px'],
+            skin:'layui-layer-lan',
+            anim: 2,
+            btn: ['取消'],
+            content: ["/updatePwd", 'yes'], //iframe的url，no代表不显示滚动条
+            end: function(){ //
+
+            }
+        });
+    }
+</script>
+<div id="wrapper">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header" id="navbar_header">
+
+        </div>
+        <!-- Top Menu Items -->
+        <ul class="nav navbar-right top-nav">
+            <li class="topLi">
+                <i class="fa fa-user-circle" style="font-size:20px;"></i>
+                欢迎<font th:text="${#authentication.name}"></font>，您上次登录时间为：<font th:text="${session.lastLoginTime}"></font></li>
+            <li class="topLi">
+                    <span class="updatePwd" style="margin-right:20px;">
+                        <a href="#" onclick="toUpdatePwd();">
+                            <i class="fa fa-fw fa-lock" style="font-size:20px;"></i>
+                            修改密码
+                        </a>
+                    </span>
+                    <span class="logOut">
+                        <a href="/logout" ><i class="fa fa-fw fa-power-off"style="font-size:20px;"></i>退 出</a>
+                    </span>
+                <!--<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <i class="fa fa-user"></i> <font th:text="${#authentication.name}"></font>
+                 <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#" ><i class="fa fa-fw fa-gear"></i> 修改密码 </a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a href="/logout" ><i class="fa fa-fw fa-power-off"></i>退 出</a>
+                    </li>
+                </ul>-->
+            </li>
+        </ul>
+        <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+        <div class="collapse navbar-collapse navbar-ex1-collapse" style="background-image:url('/img/b1.jpg')">
+            <ul class="nav navbar-nav side-nav" id="menu_tree">
+
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </nav>
+    <div id="page-wrapper" style="border-radius:5px 5px 0 0;">
+        <div id="tabContainer"></div>
+    </div>
+</div>
+</body>
+</html>

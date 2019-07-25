@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zycx.system.sys.dao.BankInfoDao">
+	<resultMap type="com.zycx.system.sys.entity.BankInfo" id="BankInfoMap">
+		<id property="id" column="id"/>
+		<result property="bankName" column="bank_name"/>
+		<result property="bankCode" column="bank_code"/>
+		<result property="contacts" column="contacts"/>
+		<result property="phoneCode" column="phone_code"/>
+		<result property="parentId" column="parent_id"/>
+	</resultMap>
+	<!--加载所有网点名称-->
+	<select id="findAllBankInfo" resultMap="BankInfoMap">
+		SELECT
+			p.id,
+			p.bank_name
+		FROM
+			bank_info p
+	</select>
+
+	<!--根据网点编码获取对应的网点信息-->
+	<select id="getBankInfoByBankCode" parameterType="String" resultMap="BankInfoMap">
+		SELECT id,bank_name,bank_code,contacts,phone_code,parent_id FROM bank_info
+		WHERE bank_code=#{bankCode} limit 1
+	</select>
+	<!--根据主键获取对象-->
+	<select id="get" parameterType="com.zycx.system.sys.entity.BankInfo" resultMap="BankInfoMap">
+		SELECT id,bank_name,bank_code,contacts,phone_code,parent_id FROM bank_info 
+		WHERE id=#{id}
+	</select>
+
+	<!--保存-->
+	<insert id="save" parameterType="com.zycx.system.sys.entity.BankInfo" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO bank_info(bank_name,bank_code,contacts,phone_code,parent_id)
+		VALUES(#{bankName},#{bankCode},#{contacts},#{phoneCode},#{parentId})
+	</insert>
+
+	<!--修改-->
+	<update id="update" parameterType="com.zycx.system.sys.entity.BankInfo">
+		UPDATE bank_info SET bank_name=#{bankName},bank_code=#{bankCode},contacts=#{contacts},phone_code=#{phoneCode},parent_id=#{parentId}
+		WHERE id=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="com.zycx.system.sys.entity.BankInfo">
+		 DELETE FROM bank_info WHERE id=#{id}
+	</delete>
+
+	<!--分页查询-->
+	<select id="findByPage" parameterType="com.zycx.system.sys.entity.QueryBankInfo" resultMap="BankInfoMap">
+		SELECT b.id,b.bank_name,b.bank_code,b.contacts,b.phone_code,d.text parent_id FROM bank_info b
+		LEFT JOIN dict d ON b.parent_id = d.id
+		WHERE 1=1
+		<if test="bankName!=null and bankName!='' "  >
+		AND b.bank_name=#{bankName}
+		</if>
+		<if test="bankCode!=null and bankCode!='' "  >
+		AND b.bank_code=#{bankCode}
+		</if>
+		<if test="contacts!=null and contacts!='' "  >
+		AND b.contacts=#{contacts}
+		</if>
+		<if test="phoneCode!=null and phoneCode!='' "  >
+		AND b.phone_code=#{phoneCode}
+		</if>
+		<if test="parentId!=null and parentId!='' "  >
+		AND b.parent_id=#{parentId}
+		</if>
+		<if test="sort!= null">
+		order by ${sort} ${order}
+		</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!--统计-->
+	<select id="count" parameterType="com.zycx.system.sys.entity.QueryBankInfo" resultType="int">
+		SELECT count(*) FROM bank_info
+		WHERE 1=1
+		<if test="bankName!=null and bankName!='' ">
+		AND bank_name=#{bankName}
+		</if>
+		<if test="bankCode!=null and bankCode!='' ">
+		AND bank_code=#{bankCode}
+		</if>
+		<if test="contacts!=null and contacts!='' ">
+		AND contacts=#{contacts}
+		</if>
+		<if test="phoneCode!=null and phoneCode!='' ">
+		AND phone_code=#{phoneCode}
+		</if>
+		<if test="parentId!=null and parentId!='' ">
+		AND parent_id=#{parentId}
+		</if>
+	</select>
+
+	<!--查询-->
+	<select id="query" parameterType="com.zycx.system.sys.entity.QueryBankInfo" resultMap="BankInfoMap">
+		SELECT id,bank_name,bank_code,contacts,phone_code,parent_id FROM bank_info
+		WHERE 1=1
+		<if test="bankName!=null and bankName!='' ">
+		AND bank_name=#{bankName}
+		</if>
+		<if test="bankCode!=null and bankCode!='' ">
+		AND bank_code=#{bankCode}
+		</if>
+		<if test="contacts!=null and contacts!='' ">
+		AND contacts=#{contacts}
+		</if>
+		<if test="phoneCode!=null and phoneCode!='' ">
+		AND phone_code=#{phoneCode}
+		</if>
+		<if test="parentId!=null and parentId!='' ">
+		AND parent_id=#{parentId}
+		</if>
+		<if test="sort!= null">
+		order by ${sort} ${order}
+		</if>
+	</select>
+</mapper>

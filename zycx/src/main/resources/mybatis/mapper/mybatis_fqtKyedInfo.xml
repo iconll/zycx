@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zycx.system.sys.dao.FqtKyedInfoDao">
+	<resultMap type="com.zycx.system.sys.entity.FqtKyedInfo" id="FqtKyedInfoMap">
+		<id property="id" column="id"/>
+		<result property="fqtBaseInfoId" column="fqt_base_info_id"/>
+		<result property="surplusMoney" column="surplus_money"/>
+		<result property="expiryDate" column="expiry_date"/>
+		<result property="operationTime" column="operation_time"/>
+		<result property="currentExpendMoney" column="current_expend_money"/>
+		<result property="importTime" column="import_time"/>
+	</resultMap>
+	<!--根据分期通基础数据ID查询对应的最后一条剩余可用额度-->
+	<select id="findLastSurplusMoneyByFqtBaseInfoId" parameterType="int" resultType="String">
+		SELECT
+			p.surplus_money
+		FROM
+			fqt_kyed_info p
+		WHERE
+			p.fqt_base_info_id = #{fqtBaseInfoId}
+		ORDER BY
+			p.operation_time DESC limit 1;
+	</select>
+	<!--根据主键获取对象-->
+	<select id="get" parameterType="com.zycx.system.sys.entity.FqtKyedInfo" resultMap="FqtKyedInfoMap">
+		SELECT id,fqt_base_info_id,surplus_money,expiry_date,operation_time,current_expend_money,import_time FROM fqt_kyed_info 
+		WHERE id=#{id}
+	</select>
+
+	<!--保存-->
+	<insert id="save" parameterType="com.zycx.system.sys.entity.FqtKyedInfo" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fqt_kyed_info(fqt_base_info_id,surplus_money,expiry_date,operation_time,current_expend_money,import_time)
+		VALUES(#{fqtBaseInfoId},#{surplusMoney},#{expiryDate},#{operationTime},#{currentExpendMoney},#{importTime})
+	</insert>
+
+	<!--修改-->
+	<update id="update" parameterType="com.zycx.system.sys.entity.FqtKyedInfo">
+		UPDATE fqt_kyed_info SET fqt_base_info_id=#{fqtBaseInfoId},surplus_money=#{surplusMoney},expiry_date=#{expiryDate},operation_time=#{operationTime},current_expend_money=#{currentExpendMoney},import_time=#{importTime}
+		WHERE id=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="com.zycx.system.sys.entity.FqtKyedInfo">
+		 DELETE FROM fqt_kyed_info WHERE id=#{id}
+	</delete>
+
+	<!--分页查询-->
+	<select id="findByPage" parameterType="com.zycx.system.sys.entity.QueryFqtKyedInfo" resultMap="FqtKyedInfoMap">
+		SELECT id,fqt_base_info_id,surplus_money,expiry_date,operation_time,current_expend_money,import_time FROM fqt_kyed_info
+		WHERE 1=1
+		<if test="fqtBaseInfoId!=null and fqtBaseInfoId!='' "  >
+		AND fqt_base_info_id=#{fqtBaseInfoId}
+		</if>
+		<if test="surplusMoney!=null and surplusMoney!='' "  >
+		AND surplus_money=#{surplusMoney}
+		</if>
+		<if test="expiryDate!=null and expiryDate!='' "  >
+		AND expiry_date=#{expiryDate}
+		</if>
+		<if test="operationTime!=null and operationTime!='' "  >
+		AND operation_time=#{operationTime}
+		</if>
+		<if test="currentExpendMoney!=null and currentExpendMoney!='' "  >
+		AND current_expend_money=#{currentExpendMoney}
+		</if>
+		<if test="importTime!=null and importTime!='' "  >
+		AND import_time=#{importTime}
+		</if>
+		<if test="sort!= null">
+		order by ${sort} ${order}
+		</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!--统计-->
+	<select id="count" parameterType="com.zycx.system.sys.entity.QueryFqtKyedInfo" resultType="int">
+		SELECT count(*) FROM fqt_kyed_info
+		WHERE 1=1
+		<if test="fqtBaseInfoId!=null and fqtBaseInfoId!='' ">
+		AND fqt_base_info_id=#{fqtBaseInfoId}
+		</if>
+		<if test="surplusMoney!=null and surplusMoney!='' ">
+		AND surplus_money=#{surplusMoney}
+		</if>
+		<if test="expiryDate!=null and expiryDate!='' ">
+		AND expiry_date=#{expiryDate}
+		</if>
+		<if test="operationTime!=null and operationTime!='' ">
+		AND operation_time=#{operationTime}
+		</if>
+		<if test="currentExpendMoney!=null and currentExpendMoney!='' ">
+		AND current_expend_money=#{currentExpendMoney}
+		</if>
+		<if test="importTime!=null and importTime!='' ">
+		AND import_time=#{importTime}
+		</if>
+	</select>
+
+	<!--查询-->
+	<select id="query" parameterType="com.zycx.system.sys.entity.QueryFqtKyedInfo" resultMap="FqtKyedInfoMap">
+		SELECT id,fqt_base_info_id,surplus_money,expiry_date,operation_time,current_expend_money,import_time FROM fqt_kyed_info
+		WHERE 1=1
+		<if test="fqtBaseInfoId!=null and fqtBaseInfoId!='' ">
+		AND fqt_base_info_id=#{fqtBaseInfoId}
+		</if>
+		<if test="surplusMoney!=null and surplusMoney!='' ">
+		AND surplus_money=#{surplusMoney}
+		</if>
+		<if test="expiryDate!=null and expiryDate!='' ">
+		AND expiry_date=#{expiryDate}
+		</if>
+		<if test="operationTime!=null and operationTime!='' ">
+		AND operation_time=#{operationTime}
+		</if>
+		<if test="currentExpendMoney!=null and currentExpendMoney!='' ">
+		AND current_expend_money=#{currentExpendMoney}
+		</if>
+		<if test="importTime!=null and importTime!='' ">
+		AND import_time=#{importTime}
+		</if>
+		<if test="sort!= null">
+		order by ${sort} ${order}
+		</if>
+	</select>
+</mapper>

@@ -1,0 +1,34 @@
+#oneDiv{
+    border: solid #98a6ad 1px ;
+    border-radius: 5px;
+    margin-left:0px;
+    margin-right: 5px;
+    box-shadow: 4px 5px 5px #888888 ;
+}
+#twoDiv{
+     border: solid #98a6ad 1px ;
+     border-radius: 5px;
+     margin-left:0px;
+     margin-right: 5px;
+     box-shadow: 4px 5px 5px #888888 ;
+ }
+#trB th{
+
+    border: solid #98a6ad 1px ;
+}
+#example1 td{
+
+    border: solid #98a6ad 1px ;
+}
+#example2 td{
+
+    border: solid #98a6ad 1px ;
+}
+.th6{
+    border: solid #98a6ad 1px;
+    padding: 10px;
+    border-radius: 5px;
+    background: #F9F9FD;
+    color: #333333;
+    font-size:14px;
+}

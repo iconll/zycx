@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zycx.system.sys.dao.FqtBaseInfoDao">
+	<resultMap type="com.zycx.system.sys.entity.FqtBaseInfo" id="FqtBaseInfoMap">
+		<id property="id" column="id"/>
+		<result property="salesman" column="salesman"/>
+		<result property="bankInfoId" column="bankInfo_id"/>
+		<result property="bankName" column="bank_name"/>
+		<result property="parentBankName" column="parentBankName"/>
+		<result property="jjTime" column="jj_time"/>
+		<result property="customerName" column="customer_name"/>
+		<result property="identityCode" column="identity_code"/>
+		<result property="applyCode" column="apply_code"/>
+		<result property="contactNumber" column="contact_number"/>
+		<result property="fqqs" column="fqqs"/>
+		<result property="fqRate" column="fq_rate"/>
+		<result property="fqMoney" column="fq_money"/>
+		<result property="teTime" column="te_time"/>
+		<result property="teMoney" column="te_money"/>
+		<result property="cardNumber" column="card_number"/>
+		<result property="expiryDate" column="expiry_date"/>
+		<result property="source" column="source"/>
+		<result property="recordPerson" column="record_person"/>
+		<result property="importTime" column="import_time"/>
+		<result property="surplusMoney" column="surplus_money"/>
+		<result property="validDays" column="validDays"/>
+	</resultMap>
+	<resultMap type="com.zycx.system.sys.entity.FqtBaseInfo" id="FqtBaseInfoReportMap">
+		<id property="id" column="id"/>
+		<result property="salesman" column="salesman"/>
+		<result property="bankName" column="bank_name"/>
+		<result property="parentBankName" column="parentBankName"/>
+		<result property="teMoney" column="te_money"/>
+		<result property="tezsMoney" column="tezsMoney"/>
+		<result property="disburseMoney" column="zyMoney"/>
+		<result property="disburseZSMoney" column="zyzsMoney"/>
+		<result property="surplusMoney" column="surplus_money"/>
+		<result property="syzsMoney" column="syzsMoney"/>
+		<result property="dyzyMoney" column="current_expend_money"/>
+		<result property="dyzyzsMoney" column="dyzyzsMoney"/>
+		<result property="zyRate" column="zyRate"/>
+	</resultMap>
+	<!--分期通基础数据统计报表-员工-->
+	<select id="findYgReportData" parameterType="com.zycx.system.sys.entity.QueryFqtBaseInfo" resultMap="FqtBaseInfoReportMap">
+        SELECT
+            tf.salesman,
+            sum( tf.te_money ) AS te_money,
+            sum( tf.tezsMoney ) AS tezsMoney,
+            sum( tf.zyMoney ) AS zyMoney,
+            sum( tf.zyzsMoney ) AS zyzsMoney,
+            sum( tf.surplus_money ) AS surplus_money,
+            sum( tf.syzsMoney ) AS syzsMoney,
+            sum( tf.current_expend_money) AS current_expend_money,
+            sum( tf.dyzyzsMoney) AS dyzyzsMoney,
+            round( sum( tf.zyMoney ) / sum( tf.te_money ) * 100, 2 ) AS zyRate
+        FROM
+            (
+                SELECT
+                    f.salesman,
+                    f.te_money,
+                    round( ( f.fqqs * ( f.fq_rate / 100 ) * f.te_money ), 2 ) AS tezsMoney,
+                    ( f.te_money - IFNULL(fk.surplus_money,f.te_money) ) AS zyMoney,
+                    round( ( f.fqqs * ( f.fq_rate / 100 ) * ( f.te_money - IFNULL(fk.surplus_money,f.te_money) ) ), 2 ) AS zyzsMoney,
+					IFNULL(fk.surplus_money,f.te_money) AS surplus_money,
+                    round( ( f.fqqs * ( f.fq_rate / 100 ) * IFNULL(fk.surplus_money,f.te_money) ), 2 ) AS syzsMoney,
+                    fkk.current_expend_money,
+                    round( ( f.fqqs * ( f.fq_rate / 100 ) * fkk.current_expend_money ), 2 ) AS dyzyzsMoney
+                FROM
+                    fqt_base_info AS f
+                        LEFT JOIN (
+							SELECT
+							fp.fqt_base_info_id,fp.surplus_money
+							FROM
+							( SELECT
+							fqt_base_info_id,surplus_money
+							FROM fqt_kyed_info
+							ORDER BY operation_time DESC )  AS fp
+							GROUP BY fp.fqt_base_info_id ORDER BY NULL DESC
+							) AS fk ON f.id = fk.fqt_base_info_id
+                        LEFT JOIN (
+                        SELECT
+                            fk.fqt_base_info_id,
+                            sum( fk.current_expend_money )  AS current_expend_money
+                        FROM
+                            fqt_kyed_info AS fk
+                        WHERE
+                            #{zyMonth} = date_format( fk.operation_time, '%Y-%m' )
+                        GROUP BY
+                            fk.fqt_base_info_id
+						ORDER BY NULL DESC
+		) AS fkk ON f.id = fkk.fqt_base_info_id
+                WHERE
+                    #{teMonth} = date_format( f.te_time, '%Y-%m' )
+            ) AS tf
+        GROUP BY
+            tf.salesman
+		ORDER BY NULL DESC
+		<if test="limit != 0">
+
+			limit #{offset},#{limit}
+		</if>
+	</select>
+	<select id="findYgReportDataCount" parameterType="com.zycx.system.sys.entity.QueryFqtBaseInfo" resultType="int">
+		SELECT COUNT(*)
+		FROM (SELECT f.salesman
+		FROM fqt_base_info f
+		WHERE #{teMonth} = date_format( f.te_time, '%Y-%m' )
+		GROUP BY f.salesman ORDER BY NULL DESC) p
+	</select>
+	<!--分期通基础数据统计报表-网点-->
+	<select id="findWdReportData" parameterType="com.zycx.system.sys.entity.QueryFqtBaseInfo" resultMap="FqtBaseInfoReportMap">
+		SELECT
+			b.bank_name,
+			( SELECT d.text FROM dict d WHERE d.id = b.parent_id AND d.type = 'BANK_INFO' ) AS parentBankName,
+			sum( tf.te_money ) AS te_money,
+			sum( tf.tezsMoney ) AS tezsMoney,
+			sum( tf.zyMoney ) AS zyMoney,
+			sum( tf.zyzsMoney ) AS zyzsMoney,
+			sum( tf.surplus_money ) AS surplus_money,
+			sum( tf.syzsMoney ) AS syzsMoney,
+			sum( tf.current_expend_money) AS current_expend_money,
+			sum( tf.dyzyzsMoney) AS dyzyzsMoney,
+			round( sum( tf.zyMoney ) / sum( tf.te_money ) * 100, 2 ) AS zyRate
+		FROM
+			(
+				SELECT
+					f.bankInfo_id,
+					f.te_money,
+					round( ( f.fqqs * ( f.fq_rate / 100 ) * f.te_money ), 2 ) AS tezsMoney,
+					( f.te_money - IFNULL(fk.surplus_money,f.te_money) ) AS zyMoney,
+					round( ( f.fqqs * ( f.fq_rate / 100 ) * ( f.te_money - IFNULL(fk.surplus_money,f.te_money) ) ), 2 ) AS zyzsMoney,
+					IFNULL(fk.surplus_money,f.te_money) AS surplus_money,
+					round( ( f.fqqs * ( f.fq_rate / 100 ) * IFNULL(fk.surplus_money,f.te_money) ), 2 ) AS syzsMoney,
+					fkk.current_expend_money,
+					round( ( f.fqqs * ( f.fq_rate / 100 ) * fkk.current_expend_money ), 2 ) AS dyzyzsMoney
+				FROM
+					fqt_base_info AS f
+						LEFT JOIN (
+							SELECT
+								fp.fqt_base_info_id,fp.surplus_money
+							FROM
+							( SELECT
+							fqt_base_info_id,surplus_money
+							FROM fqt_kyed_info
+							ORDER BY operation_time DESC ) AS fp
+							GROUP BY fp.fqt_base_info_id
+							ORDER BY NULL DESC) AS fk ON f.id = fk.fqt_base_info_id
+						LEFT JOIN (
+						SELECT
+							fk.fqt_base_info_id,
+							sum( fk.current_expend_money ) AS current_expend_money
+						FROM
+							fqt_kyed_info AS fk
+						WHERE
+							#{zyMonth} = date_format( fk.operation_time, '%Y-%m' )
+						GROUP BY
+							fk.fqt_base_info_id
+						ORDER BY NULL DESC
+					) AS fkk ON f.id = fkk.fqt_base_info_id
+				WHERE
+					#{teMonth} = date_format( f.te_time, '%Y-%m' )
+			) tf left join bank_info b on tf.bankInfo_id = b.id
+		GROUP BY
+			tf.bankInfo_id
+		ORDER BY NULL DESC
+		<if test="limit != 0">
+
+			limit #{offset},#{limit}
+		</if>
+	</select>
+	<select id="findWdReportDataCount" parameterType="com.zycx.system.sys.entity.QueryFqtBaseInfo" resultType="int">
+		SELECT COUNT(*)
+		FROM (SELECT f.bankInfo_id
+			  FROM fqt_base_info f
+			  WHERE #{teMonth} = date_format( f.te_time, '%Y-%m' )
+			  GROUP BY f.bankInfo_id
+			  ORDER BY NULL DESC) p
+	</select>
+	<!--根据分期通基础数据id和支用月份获取当月支用金额-->
+	<select id="findDyzyMoneyByBaseIdAndMonth" parameterType="com.zycx.system.sys.entity.QueryFqtBaseInfo" resultType="String">
+		SELECT
+			sum( p.current_expend_money ) current_expend_money
+		FROM
+			fqt_kyed_info p
+		where p.fqt_base_info_id = #{id}
+		  and date_format( p.operation_time, '%Y-%m' ) = #{zyMonth}
+	</select>
+	<!--根据申请编码获取对象-->
+	<select id="getFqtBaseInfoByApplyCode" parameterType="String" resultMap="FqtBaseInfoMap">
+		SELECT id,salesman,bankInfo_id,jj_time,customer_name,identity_code,apply_code,contact_number,fqqs,fq_rate,fq_money,te_time,te_money,card_number,expiry_date,source,record_person,import_time FROM fqt_base_info
+		WHERE apply_code=#{applyCode} limit 1
+	</select>
+	<!--根据主键获取对象-->
+	<select id="get" parameterType="com.zycx.system.sys.entity.FqtBaseInfo" resultMap="FqtBaseInfoMap">
+		SELECT id,salesman,bankInfo_id,jj_time,customer_name,identity_code,apply_code,contact_number,fqqs,fq_rate,fq_money,te_time,te_money,card_number,expiry_date,source,record_person,import_time FROM fqt_base_info
+		WHERE id=#{id}
+	</select>
+
+	<!--保存-->
+	<insert id="save" parameterType="com.zycx.system.sys.entity.FqtBaseInfo" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fqt_base_info(salesman,bankInfo_id,jj_time,customer_name,identity_code,apply_code,contact_number,fqqs,fq_rate,fq_money,te_time,te_money,card_number,expiry_date,source,record_person,import_time)
+		VALUES(#{salesman},#{bankInfoId},#{jjTime},#{customerName},#{identityCode},#{applyCode},#{contactNumber},#{fqqs},#{fqRate},#{fqMoney},#{teTime},#{teMoney},#{cardNumber},#{expiryDate},#{source},#{recordPerson},#{importTime})
+	</insert>
+
+	<!--修改-->
+	<update id="update" parameterType="com.zycx.system.sys.entity.FqtBaseInfo">
+		UPDATE fqt_base_info SET salesman=#{salesman},bankInfo_id=#{bankInfoId},jj_time=#{jjTime},customer_name=#{customerName},identity_code=#{identityCode},apply_code=#{applyCode},contact_number=#{contactNumber},fqqs=#{fqqs},fq_rate=#{fqRate},fq_money=#{fqMoney},te_time=#{teTime},te_money=#{teMoney},card_number=#{cardNumber},expiry_date=#{expiryDate},source=#{source},record_person=#{recordPerson},import_time=#{importTime}
+		WHERE id=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="com.zycx.system.sys.entity.FqtBaseInfo">
+		 DELETE FROM fqt_base_info WHERE id=#{id}
+	</delete>
+
+	<!--分页查询-->
+	<select id="findByPage" parameterType="com.zycx.system.sys.entity.QueryFqtBaseInfo" resultMap="FqtBaseInfoMap">
+		SELECT
+			f.id,
+			f.salesman,
+			b.bank_name,
+			f.jj_time,
+			f.customer_name,
+			f.apply_code,
+			f.fqqs,
+			f.fq_rate,
+			f.fq_money,
+			f.te_time,
+			f.te_money,
+			f.card_number,
+			f.expiry_date,
+			f.source,
+			f.record_person,
+			f.import_time,
+			f.identity_code,
+			f.contact_number,
+			( SELECT d.text FROM dict d WHERE d.id = b.parent_id AND d.type = 'BANK_INFO' ) parentBankName,
+			fki.surplus_money,
+			DATEDIFF(f.expiry_date,now()) validDays
+		FROM
+		fqt_base_info f
+		LEFT JOIN bank_info b ON f.bankInfo_id = b.id
+		LEFT JOIN (SELECT
+			fk.fqt_base_info_id,fk.surplus_money
+			FROM
+			( SELECT
+			fqt_base_info_id,surplus_money
+			FROM fqt_kyed_info
+			ORDER BY operation_time DESC ) fk
+			GROUP BY
+			fk.fqt_base_info_id
+		    ORDER BY NULL DESC
+		) fki ON fki.fqt_base_info_id = f.id
+		<where>
+			<if test="salesman!=null and salesman!='' "  >
+				AND f.salesman=#{salesman}
+			</if>
+			<if test="bankInfoId!=null and bankInfoId!='' "  >
+				AND f.bankInfo_id=#{bankInfoId}
+			</if>
+			<if test="jjStartTime!=null and jjStartTime!='' and jjEndTime!=null and jjEndTime!=''"  >
+				AND f.jj_time BETWEEN #{jjStartTime} AND #{jjEndTime}
+			</if>
+			<if test="customerName!=null and customerName!='' "  >
+				AND f.customer_name=#{customerName}
+			</if>
+			<if test="identityCode!=null and identityCode!='' "  >
+				AND f.identity_code=#{identityCode}
+			</if>
+			<if test="applyCode!=null and applyCode!='' "  >
+				AND f.apply_code=#{applyCode}
+			</if>
+			<if test="contactNumber!=null and contactNumber!='' "  >
+				AND f.contact_number=#{contactNumber}
+			</if>
+			<if test="fqqs!=null and fqqs!='' "  >
+				AND f.fqqs=#{fqqs}
+			</if>
+			<if test="fqRate!=null and fqRate!='' "  >
+				AND fq_rate=#{fqRate}
+			</if>
+			<if test="fqMoney!=null and fqMoney!='' "  >
+				AND f.fq_money=#{fqMoney}
+			</if>
+			<if test="teTime!=null and teTime!='' "  >
+				AND f.te_time=#{teTime}
+			</if>
+			<if test="teMoney!=null and teMoney!='' "  >
+				AND f.te_money=#{teMoney}
+			</if>
+			<if test="cardNumber!=null and cardNumber!='' "  >
+				AND f.card_number=#{cardNumber}
+			</if>
+			<if test="expiryDate!=null and expiryDate!='' "  >
+				AND f.expiry_date=#{expiryDate}
+			</if>
+			<if test="source!=null and source!='' "  >
+				AND f.source=#{source}
+			</if>
+			<if test="recordPerson!=null and recordPerson!='' "  >
+				AND f.record_person=#{recordPerson}
+			</if>
+			<if test="importTime!=null and importTime!='' "  >
+				AND f.import_time=#{importTime}
+			</if>
+			<if test="validDays!=null and validDays!=0 "  >
+		        AND f.expiry_date &gt;= now()
+				AND #{validDays} &gt;= DATEDIFF(f.expiry_date,now())
+			</if>
+		</where>
+		<if test="sort!= null">
+		order by ${sort} ${order}
+		</if>
+		<if test="limit != 0">
+
+			limit #{offset},#{limit}
+		</if>
+	</select>
+
+	<!--统计-->
+	<select id="count" parameterType="com.zycx.system.sys.entity.QueryFqtBaseInfo" resultType="int">
+		SELECT count(*) FROM fqt_base_info
+		WHERE 1=1
+		<if test="salesman!=null and salesman!='' ">
+		AND salesman=#{salesman}
+		</if>
+		<if test="bankInfoId!=null and bankInfoId!='' ">
+		AND bankInfo_id=#{bankInfoId}
+		</if>
+		<if test="jjStartTime!=null and jjStartTime!='' and jjEndTime!=null and jjEndTime!=''"  >
+			AND jj_time BETWEEN #{jjStartTime} AND #{jjEndTime}
+		</if>
+		<if test="customerName!=null and customerName!='' ">
+		AND customer_name=#{customerName}
+		</if>
+		<if test="identityCode!=null and identityCode!='' ">
+		AND identity_code=#{identityCode}
+		</if>
+		<if test="applyCode!=null and applyCode!='' ">
+		AND apply_code=#{applyCode}
+		</if>
+		<if test="contactNumber!=null and contactNumber!='' ">
+		AND contact_number=#{contactNumber}
+		</if>
+		<if test="fqqs!=null and fqqs!='' ">
+		AND fqqs=#{fqqs}
+		</if>
+		<if test="fqRate!=null and fqRate!='' ">
+		AND fq_rate=#{fqRate}
+		</if>
+		<if test="fqMoney!=null and fqMoney!='' ">
+		AND fq_money=#{fqMoney}
+		</if>
+		<if test="teTime!=null and teTime!='' ">
+		AND te_time=#{teTime}
+		</if>
+		<if test="teMoney!=null and teMoney!='' ">
+		AND te_money=#{teMoney}
+		</if>
+		<if test="cardNumber!=null and cardNumber!='' ">
+		AND card_number=#{cardNumber}
+		</if>
+		<if test="expiryDate!=null and expiryDate!='' ">
+		AND expiry_date=#{expiryDate}
+		</if>
+		<if test="source!=null and source!='' ">
+		AND source=#{source}
+		</if>
+		<if test="recordPerson!=null and recordPerson!='' ">
+		AND record_person=#{recordPerson}
+		</if>
+		<if test="importTime!=null and importTime!='' ">
+		AND import_time=#{importTime}
+		</if>
+        <if test="validDays!=null and validDays!=0 "  >
+            AND expiry_date &gt;= now()
+            AND #{validDays} &gt;= DATEDIFF(expiry_date,now())
+        </if>
+	</select>
+
+	<!--查询-->
+	<select id="query" parameterType="com.zycx.system.sys.entity.QueryFqtBaseInfo" resultMap="FqtBaseInfoMap">
+		SELECT
+		f.id,
+		f.salesman,
+		b.bank_name,
+		f.jj_time,
+		f.customer_name,
+		f.apply_code,
+		f.fqqs,
+		f.fq_rate,
+		f.fq_money,
+		f.te_time,
+		f.te_money,
+		f.card_number,
+		f.expiry_date,
+		f.source,
+		f.record_person,
+		f.import_time,
+		f.identity_code,
+		f.contact_number,
+		( SELECT d.text FROM dict d WHERE d.id = b.parent_id AND d.type = 'BANK_INFO' ) parentBankName,
+		fki.surplus_money,
+		DATEDIFF(f.expiry_date,now()) validDays
+		FROM
+		fqt_base_info f
+		LEFT JOIN bank_info b ON f.bankInfo_id = b.id
+		LEFT JOIN (SELECT
+			fk.fqt_base_info_id,fk.surplus_money
+			FROM
+			( SELECT
+			fqt_base_info_id,surplus_money
+			FROM fqt_kyed_info
+			ORDER BY operation_time DESC ) fk
+			GROUP BY
+			fk.fqt_base_info_id
+			ORDER BY NULL DESC
+		) fki ON fki.fqt_base_info_id = f.id
+		<where>
+			<if test="salesman!=null and salesman!='' "  >
+				AND f.salesman=#{salesman}
+			</if>
+			<if test="bankInfoId!=null and bankInfoId!='' "  >
+				AND f.bankInfo_id=#{bankInfoId}
+			</if>
+			<if test="jjTime!=null and jjTime!='' "  >
+				AND f.jj_time=#{jjTime}
+			</if>
+			<if test="customerName!=null and customerName!='' "  >
+				AND f.customer_name=#{customerName}
+			</if>
+			<if test="identityCode!=null and identityCode!='' "  >
+				AND f.identity_code=#{identityCode}
+			</if>
+			<if test="applyCode!=null and applyCode!='' "  >
+				AND f.apply_code=#{applyCode}
+			</if>
+			<if test="contactNumber!=null and contactNumber!='' "  >
+				AND f.contact_number=#{contactNumber}
+			</if>
+			<if test="fqqs!=null and fqqs!='' "  >
+				AND f.fqqs=#{fqqs}
+			</if>
+			<if test="fqRate!=null and fqRate!='' "  >
+				AND fq_rate=#{fqRate}
+			</if>
+			<if test="fqMoney!=null and fqMoney!='' "  >
+				AND f.fq_money=#{fqMoney}
+			</if>
+			<if test="teTime!=null and teTime!='' "  >
+				AND f.te_time=#{teTime}
+			</if>
+			<if test="teMoney!=null and teMoney!='' "  >
+				AND f.te_money=#{teMoney}
+			</if>
+			<if test="cardNumber!=null and cardNumber!='' "  >
+				AND f.card_number=#{cardNumber}
+			</if>
+			<if test="expiryDate!=null and expiryDate!='' "  >
+				AND f.expiry_date=#{expiryDate}
+			</if>
+			<if test="source!=null and source!='' "  >
+				AND f.source=#{source}
+			</if>
+			<if test="recordPerson!=null and recordPerson!='' "  >
+				AND f.record_person=#{recordPerson}
+			</if>
+			<if test="importTime!=null and importTime!='' "  >
+				AND f.import_time=#{importTime}
+			</if>
+			<if test="validDays!=null and validDays!=0 "  >
+				AND f.expiry_date &gt;= now()
+				AND #{validDays} &gt;= DATEDIFF(f.expiry_date,now())
+			</if>
+		</where>
+        <if test="sort!= null">
+            order by ${sort} ${order}
+        </if>
+	</select>
+</mapper>

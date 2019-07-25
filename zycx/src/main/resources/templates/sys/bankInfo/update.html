@@ -1,0 +1,134 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<body>
+<form id="bankInfoForm"  role="form" method="post" action="bankInfo/update">
+    <div class="row">
+        <div class="col-md-12">
+            <input type="hidden" name="id" id="bankId" th:value="${entity.id}" />
+            <div class="form-group" >
+                <label for="bankName"><span style="color:red;">*</span>支行名称:</label>
+                <input type="text" class="form-control" name="bankName" id="bankName" th:value="${entity.bankName}"  placeholder="请输入支行名称" />
+            </div>
+            <div class="form-group">
+                <label for="bankCode"><span style="color:red;">*</span>支行代码:</label>
+                <input type="text" class="form-control" name="bankCode" id="bankCode" th:value="${entity.bankCode}"  placeholder="请输入支行代码" />
+            </div>
+            <div class="form-group" >
+                <label for="contacts"><span style="color:red;">*</span>联系人:</label>
+                <input type="text" class="form-control" name="contacts" id="contacts" th:value="${entity.contacts}"  placeholder="请输入联系人" />
+            </div>
+            <div class="form-group" >
+                <label for="phoneCode"><span style="color:red;">*</span>手机号码:</label>
+                <input type="text" class="form-control" name="phoneCode" id="phoneCode" th:value="${entity.phoneCode}"  placeholder="请输入手机号码" />
+            </div>
+            <div class="form-group" style="margin-top: 10px;">
+                <label for="parentId">所属管辖支行:</label>
+                <select name="parentId" id="parentId" class="form-control"></select>
+            </div>
+        </div>
+        <div class="col-md-3" style="margin-top: 10px;display: none;">
+            <ul id="groupZtree" class="ztree" style="width:200px; overflow:auto;"></ul>
+        </div>
+    </div>
+</form>
+<script th:inline="javascript">
+    <![CDATA[
+    $(function () {
+        //加载所属支行下拉框
+        loadDictIntoToSelectOption("parentId","BANK_INFO",[[${entity.parentId}]]);
+        $('#bankInfoForm').bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                bankName: {
+                    message: '支行名称验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '支行名称不能为空'
+                        } ,
+                        stringLength: {
+                            min: 2,
+                            max: 30,
+                            message: '名字长度必须在2到30之间'
+                        }
+                    }
+                },
+                bankCode: {
+                    message: '支行代码验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '支行代码不能为空'
+                        },
+                        stringLength: {
+                            min: 6,
+                            max: 30,
+                            message: '支行代码长度必须在6到30之间'
+                        }
+                    }
+                },
+                contacts: {
+                    message:'联系人无效',
+                    validators: {
+                        notEmpty: {
+                            message: '联系人不能为空'
+                        },
+                        stringLength: {
+                            min: 2,
+                            max: 30,
+                            message: '类目长度必须在6到30之间'
+                        }
+                    }
+                },
+                phoneCode: {
+                    message:'手机号码无效',
+                    validators: {
+                        notEmpty: {
+                            message: '手机号码不能为空'
+                        },
+                        regexp: {//匹配规则
+                            regexp: /^1(3[0-9]|5[189]|8[6789])[0-9]{8}$/,
+                            message: '手机号码格式错误'
+                        }
+                    }
+                }
+            }
+        })
+
+        // 绑定dialog的确定按钮的监听事件
+        $("#btnOk",window.top.document).click(function() {
+            // 此段是为防止需要点击两次按钮来实现验证的方法，若不添加此处的放行，那么我们将要点击两次确定按钮才可以提交验证
+            var bankName = $("#bankName").val();
+            // 判断当前的code有值，且当前不存在错误验证方可放开该字段的验证
+            if(bankName != null && bankName != ""&&$("#bankName").parent("div").find('.glyphicon-remove').length==0){
+                $('#bankInfoForm').bootstrapValidator('enableFieldValidators', 'bankName', false);
+            } else {
+                $('#bankInfoForm').bootstrapValidator('enableFieldValidators', 'bankName', true);
+            }
+            var bootstrapValidator = $("#bankInfoForm", window.top.document).data('bootstrapValidator');
+            bootstrapValidator.validate();
+            if(bootstrapValidator.isValid()){
+                $.post($("#bankInfoForm",window.top.document).attr('action'),$("#bankInfoForm",window.top.document).serialize(),function(e){
+                    if(e.result){
+                        $('.modal-dialog', window.top.document).parent('div').remove()
+                        $('body', window.top.document).find('.modal-backdrop').remove();
+                        // jquery 调用刷新当前操作的table页面的refresh方法
+                        $(window.parent.document).contents().find(".tab-pane.fade.active.in iframe")[0].contentWindow.doQuery();
+                        window.Ewin.alert({message:'修改数据成功!'});
+                    }else{
+                        window.Ewin.alert({message:'修改数据失败!'});
+                    }
+                })
+            }else{
+                return false;
+            }
+        })
+
+    })
+    ]]>
+</script>
+</body>
+</html>

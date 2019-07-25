@@ -1,0 +1,25 @@
+ html{
+  height:100%;
+  width:100%;
+ }
+body{
+    background: url("../img/c.jpg") no-repeat;
+    background-size: cover;
+    animation-name:myfirst;
+    animation-duration:12s;
+    /*变换时间*/
+    animation-delay:3s;
+    /*动画开始时间*/
+    animation-iteration-count:infinite;
+    /*下一周期循环播放*/
+    animation-play-state:running;
+    /*动画开始运行*/
+}
+@keyframes myfirst
+{
+    0%   {background:url("../img/c1.jpg");}
+    34%  {background:url("../img/c2.jpg");}
+    67%  {background:url("../img/c1.jpg");}
+    100% {background:url("../img/c2.jpg");}
+}
+.form{background: rgba(255,255,255,0.2);width:450px;margin:120px auto;}

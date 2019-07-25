@@ -1,0 +1,658 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zycx.system.sys.dao.JzBaseInfoDao">
+	<resultMap type="com.zycx.system.sys.entity.JzBaseInfo" id="JzBaseInfoMap">
+		<id property="id" column="id"/>
+		<result property="employeeId" column="employee_id"/>
+		<result property="employeeName" column="employee_name"/>
+		<result property="jjType" column="jj_type"/>
+		<result property="bankInfoId" column="bankInfo_id"/>
+		<result property="jjTime" column="jj_time"/>
+		<result property="customerName" column="customer_name"/>
+		<result property="identityCode" column="identity_code"/>
+		<result property="applyCode" column="apply_code"/>
+		<result property="contactNumber" column="contact_number"/>
+		<result property="workCompany" column="work_company"/>
+		<result property="houseType" column="house_type"/>
+		<result property="jzFqQs" column="jz_fq_qs"/>
+		<result property="jzFqRate" column="jz_fq_rate"/>
+		<result property="jzFqMoney" column="jz_fq_money"/>
+		<result property="jzSpMoney" column="jz_sp_money"/>
+		<result property="passDate" column="pass_date"/>
+		<result property="firstTeTime" column="first_te_time"/>
+		<result property="firstTeMoney" column="first_te_money"/>
+		<result property="secondTeTime" column="second_te_time"/>
+		<result property="secondTeMoney" column="second_te_money"/>
+		<result property="surplusMoney" column="surplus_money"/>
+		<result property="operater" column="operater"/>
+		<result property="firstZyFlag" column="first_zy_flag"/>
+		<result property="secondZyFlag" column="second_zy_flag"/>
+		<result property="edEndTime" column="ed_end_time"/>
+		<result property="cardNumber" column="card_number"/>
+		<result property="bankName" column="bank_name"/>
+		<result property="parentBankName" column="parentBankName"/>
+		<result property="validDays" column="validDays"/>
+		<result property="governor" column="governor"/>
+		<result property="acceptorg" column="acceptorg"/>
+		<result property="yxqd" column="yxqd"/>
+		<result property="isGd" column="is_gd"/>
+		<result property="guidangDate" column="guidang_date"/>
+	</resultMap>
+	<resultMap type="com.zycx.system.sys.entity.JzBaseInfo" id="JzBaseInfoReportMap">
+		<id property="id" column="id"/>
+		<result property="employeeId" column="employee_id"/>
+		<result property="employeeName" column="employee_name"/>
+		<result property="bankName" column="bank_name"/>
+		<result property="parentBankName" column="parentBankName"/>
+		<result property="teMoney" column="te_money"/>
+		<result property="tezsMoney" column="tezsMoney"/>
+		<result property="disburseMoney" column="zyMoney"/>
+		<result property="disburseZSMoney" column="zyzsMoney"/>
+		<result property="surplusMoney" column="surplus_money"/>
+		<result property="syzsMoney" column="syzsMoney"/>
+		<result property="dyzyMoney" column="current_expend_money"/>
+		<result property="dyzyzsMoney" column="dyzyzsMoney"/>
+		<result property="zyRate" column="zyRate"/>
+	</resultMap>
+	<!--查询家装分期基础数据统计（员工）-->
+	<select id="findJzYgReportData" parameterType="com.zycx.system.sys.entity.QueryJzBaseInfo" resultMap="JzBaseInfoReportMap">
+		SELECT
+			tf.employee_id,
+			tf.employee_name,
+			sum( tf.te_money ) AS te_money,
+			sum( tf.tezsMoney ) AS tezsMoney,
+			sum( tf.zyMoney ) AS zyMoney,
+			sum( tf.zyzsMoney ) AS zyzsMoney,
+			sum( tf.surplus_money ) AS surplus_money,
+			sum( tf.syzsMoney ) AS syzsMoney,
+			sum( tf.current_expend_money ) AS current_expend_money,
+			sum( tf.dyzyzsMoney ) AS dyzyzsMoney,
+			round( sum( tf.zyMoney ) / sum( tf.te_money ) * 100, 2 ) AS zyRate
+		FROM
+			(
+				SELECT
+					f.employee_id,
+					f.employee_name,
+					f.te_money,
+					round( ( f.fqqs * ( f.fq_rate / 100 ) * f.te_money ), 2 ) AS tezsMoney,
+					( f.te_money - IFNULL( f.surplus_money, f.te_money ) ) AS zyMoney,
+					round(
+							(
+									f.fqqs * ( f.fq_rate / 100 ) * ( f.te_money - IFNULL( f.surplus_money, f.te_money ) )
+								),
+							2
+						) AS zyzsMoney,
+					IFNULL( f.surplus_money, f.te_money ) AS surplus_money,
+					round(
+							( f.fqqs * ( f.fq_rate / 100 ) * IFNULL( f.surplus_money, f.te_money ) ),
+							2
+						) AS syzsMoney,
+					f.current_expend_money,
+					round( ( f.fqqs * ( f.fq_rate / 100 ) * f.current_expend_money ), 2 ) AS dyzyzsMoney
+				FROM
+					(
+						SELECT
+							j.employee_id,
+							j.employee_name,
+							(IFNULL(j.first_te_money,0) + IFNULL(j.second_te_money,0) ) AS te_money,
+							j.jz_fq_qs AS fqqs,
+							j.jz_fq_rate AS fq_rate,
+							j.surplus_money,
+							jk.current_expend_money
+						FROM
+							jz_base_info AS j
+								LEFT JOIN (
+								SELECT
+									jk.jz_id,
+									sum( jk.current_expend_money ) AS current_expend_money
+								FROM
+									jz_kyed_info AS jk
+								WHERE
+									#{zyMonth} = date_format( jk.operation_time, '%Y-%m' )
+								GROUP BY
+									jk.jz_id
+								ORDER BY
+									NULL DESC
+							) jk ON j.id = jk.jz_id
+						WHERE #{passMonth} = date_format( j.pass_date, '%Y-%m' )
+					) f
+			) tf
+		GROUP BY
+			tf.employee_id,tf.employee_name
+		ORDER BY NULL DESC
+		<if test="limit != 0">
+
+			limit #{offset},#{limit}
+		</if>
+	</select>
+	<select id="findJzYgReportDataCount" parameterType="com.zycx.system.sys.entity.QueryJzBaseInfo" resultType="int">
+		SELECT
+			COUNT( * )
+		FROM
+			(
+				SELECT
+					f.employee_id,
+					f.employee_name
+				FROM
+					jz_base_info f
+				WHERE
+					#{passMonth} = date_format( f.pass_date, '%Y-%m' )
+				GROUP BY
+					f.employee_id,
+					f.employee_name
+				ORDER BY
+					NULL DESC
+			) p
+	</select>
+	<!--查询家装分期基础数据统计（网点）-->
+	<select id="findJzWdReportData" parameterType="com.zycx.system.sys.entity.QueryJzBaseInfo" resultMap="JzBaseInfoReportMap">
+		SELECT
+			b.bank_name,
+			( SELECT d.text FROM dict d WHERE d.id = b.parent_id AND d.type = 'BANK_INFO' ) AS parentBankName,
+			sum( tf.te_money ) AS te_money,
+			sum( tf.tezsMoney ) AS tezsMoney,
+			sum( tf.zyMoney ) AS zyMoney,
+			sum( tf.zyzsMoney ) AS zyzsMoney,
+			sum( tf.surplus_money ) AS surplus_money,
+			sum( tf.syzsMoney ) AS syzsMoney,
+			sum( tf.current_expend_money ) AS current_expend_money,
+			sum( tf.dyzyzsMoney ) AS dyzyzsMoney,
+			round( sum( tf.zyMoney ) / sum( tf.te_money ) * 100, 2 ) AS zyRate
+		FROM
+			(
+				SELECT
+					f.bankInfo_id,
+					f.te_money,
+					round( ( f.fqqs * ( f.fq_rate / 100 ) * f.te_money ), 2 ) AS tezsMoney,
+					( f.te_money - IFNULL( f.surplus_money, f.te_money ) ) AS zyMoney,
+					round(
+							(
+									f.fqqs * ( f.fq_rate / 100 ) * ( f.te_money - IFNULL( f.surplus_money, f.te_money ) )
+								),
+							2
+						) AS zyzsMoney,
+					IFNULL( f.surplus_money, f.te_money ) AS surplus_money,
+					round(
+							( f.fqqs * ( f.fq_rate / 100 ) * IFNULL( f.surplus_money, f.te_money ) ),
+							2
+						) AS syzsMoney,
+					f.current_expend_money,
+					round( ( f.fqqs * ( f.fq_rate / 100 ) * f.current_expend_money ), 2 ) AS dyzyzsMoney
+				FROM
+					(
+						SELECT
+							j.bankInfo_id,
+							(IFNULL(j.first_te_money,0) + IFNULL(j.second_te_money,0) ) AS te_money,
+							j.jz_fq_qs AS fqqs,
+							j.jz_fq_rate AS fq_rate,
+							j.surplus_money,
+							jk.current_expend_money
+						FROM
+							jz_base_info AS j
+								LEFT JOIN (
+								SELECT
+									jk.jz_id,
+									sum( jk.current_expend_money ) AS current_expend_money
+								FROM
+									jz_kyed_info AS jk
+								WHERE
+									#{zyMonth} = date_format( jk.operation_time, '%Y-%m' )
+								GROUP BY
+									jk.jz_id
+								ORDER BY
+									NULL DESC
+							) jk ON j.id = jk.jz_id
+						WHERE #{passMonth}= date_format( j.pass_date, '%Y-%m' )
+					) f
+			) tf left join bank_info b on tf.bankInfo_id = b.id
+		GROUP BY
+			tf.bankInfo_id
+		ORDER BY NULL DESC
+		<if test="limit != 0">
+
+			limit #{offset},#{limit}
+		</if>
+	</select>
+	<select id="findJzWdReportDataCount" parameterType="com.zycx.system.sys.entity.QueryJzBaseInfo" resultType="int">
+		SELECT
+			COUNT( * )
+		FROM
+			(
+				SELECT
+					f.bankInfo_id
+				FROM
+					jz_base_info f
+				WHERE
+					#{passMonth} = date_format( f.pass_date, '%Y-%m' )
+				GROUP BY
+					f.bankInfo_id
+				ORDER BY
+					NULL DESC
+			) p
+	</select>
+	<!--根据申请编码获取对象-->
+	<select id="getJzBaseInfoByApplyCode" parameterType="String" resultMap="JzBaseInfoMap">
+		SELECT id,employee_id,employee_name,jj_type,bankInfo_id,jj_time,customer_name,identity_code,apply_code,contact_number,work_company,house_type,jz_fq_qs,jz_fq_rate,jz_fq_money,jz_sp_money,pass_date,first_te_time,first_te_money,second_te_time,second_te_money,surplus_money,operater,first_zy_flag,second_zy_flag,ed_end_time,card_number,governor,acceptorg,yxqd,is_gd,guidang_date FROM jz_base_info
+		WHERE apply_code=#{applyCode} limit 1
+	</select>
+	<!--根据主键获取对象-->
+	<select id="get" parameterType="com.zycx.system.sys.entity.JzBaseInfo" resultMap="JzBaseInfoMap">
+		SELECT id,employee_id,employee_name,jj_type,bankInfo_id,jj_time,customer_name,identity_code,apply_code,contact_number,work_company,house_type,jz_fq_qs,jz_fq_rate,jz_fq_money,jz_sp_money,pass_date,first_te_time,first_te_money,second_te_time,second_te_money,surplus_money,operater,first_zy_flag,second_zy_flag,ed_end_time,card_number,governor,acceptorg,yxqd,is_gd,guidang_date FROM jz_base_info
+		WHERE id=#{id}
+	</select>
+
+	<!--保存-->
+	<insert id="save" parameterType="com.zycx.system.sys.entity.JzBaseInfo" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO jz_base_info(employee_id,employee_name,jj_type,bankInfo_id,jj_time,customer_name,identity_code,apply_code,contact_number,work_company,house_type,jz_fq_qs,jz_fq_rate,jz_fq_money,jz_sp_money,pass_date,first_te_time,first_te_money,second_te_time,second_te_money,surplus_money,operater,first_zy_flag,second_zy_flag,ed_end_time,card_number,governor,acceptorg,yxqd,is_gd,guidang_date)
+		VALUES(#{employeeId},#{employeeName},#{jjType},#{bankInfoId},#{jjTime},#{customerName},#{identityCode},#{applyCode},#{contactNumber},#{workCompany},#{houseType},#{jzFqQs},#{jzFqRate},#{jzFqMoney},#{jzSpMoney},#{passDate},#{firstTeTime},#{firstTeMoney},#{secondTeTime},#{secondTeMoney},#{surplusMoney},#{operater},#{firstZyFlag},#{secondZyFlag},#{edEndTime},#{cardNumber},#{governor},#{acceptorg},#{yxqd},#{isGd},#{guidangDate})
+	</insert>
+
+	<!--修改-->
+	<update id="update" parameterType="com.zycx.system.sys.entity.JzBaseInfo">
+		UPDATE jz_base_info SET employee_id=#{employeeId},employee_name=#{employeeName},jj_type=#{jjType},bankInfo_id=#{bankInfoId},jj_time=#{jjTime},customer_name=#{customerName},identity_code=#{identityCode},apply_code=#{applyCode},contact_number=#{contactNumber},work_company=#{workCompany},house_type=#{houseType},jz_fq_qs=#{jzFqQs},jz_fq_rate=#{jzFqRate},jz_fq_money=#{jzFqMoney},jz_sp_money=#{jzSpMoney},pass_date=#{passDate},first_te_time=#{firstTeTime},first_te_money=#{firstTeMoney},second_te_time=#{secondTeTime},second_te_money=#{secondTeMoney},surplus_money=#{surplusMoney},operater=#{operater},first_zy_flag=#{firstZyFlag},second_zy_flag=#{secondZyFlag},ed_end_time=#{edEndTime},card_number=#{cardNumber},governor=#{governor},acceptorg=#{acceptorg},yxqd=#{yxqd},is_gd=#{isGd},guidang_date=#{guidangDate}
+		WHERE id=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="com.zycx.system.sys.entity.JzBaseInfo">
+		 DELETE FROM jz_base_info WHERE id=#{id}
+	</delete>
+
+	<!--分页查询-->
+	<select id="findByPage" parameterType="com.zycx.system.sys.entity.QueryJzBaseInfo" resultMap="JzBaseInfoMap">
+		SELECT
+		j.id,
+		j.employee_id,
+		j.employee_name,
+		b.bank_name,
+		j.jj_type,
+		j.bankInfo_id,
+		j.jj_time,
+		j.customer_name,
+		j.identity_code,
+		j.apply_code,
+		j.contact_number,
+		j.work_company,
+		j.house_type,
+		j.jz_fq_qs,
+		j.jz_fq_rate,
+		j.jz_fq_money,
+		j.jz_sp_money,
+		j.pass_date,
+		j.first_te_time,
+		j.first_te_money,
+		j.second_te_time,
+		j.second_te_money,
+		j.surplus_money,
+		j.operater,
+		j.first_zy_flag,
+		j.second_zy_flag,
+		j.ed_end_time,
+		j.card_number,
+		j.governor,
+		j.acceptorg,
+		j.yxqd,
+		j.is_gd,
+		j.guidang_date,
+		( SELECT d.text FROM dict d WHERE d.id = b.parent_id AND d.type = 'BANK_INFO' ) parentBankName,
+		DATEDIFF( j.ed_end_time, now( ) ) validDays
+		FROM
+		jz_base_info j
+		LEFT JOIN bank_info b ON j.bankInfo_id = b.id
+		<where>
+			<if test="employeeId!=null and employeeId!='' "  >
+				AND j.employee_id=#{employeeId}
+			</if>
+			<if test="employeeName!=null and employeeName!='' "  >
+				AND j.employee_name=#{employeeName}
+			</if>
+			<if test="jjType!=null and jjType!='' "  >
+				AND j.jj_type=#{jjType}
+			</if>
+			<if test="bankInfoId!=null and bankInfoId!='' "  >
+				AND j.bankInfo_id=#{bankInfoId}
+			</if>
+			<if test="jjStartTime!=null and jjStartTime!='' and jjEndTime!=null and jjEndTime!=''"  >
+				AND j.jj_time BETWEEN #{jjStartTime} AND #{jjEndTime}
+			</if>
+			<if test="customerName!=null and customerName!='' "  >
+				AND j.customer_name=#{customerName}
+			</if>
+			<if test="identityCode!=null and identityCode!='' "  >
+				AND j.identity_code=#{identityCode}
+			</if>
+			<if test="applyCode!=null and applyCode!='' "  >
+				AND j.apply_code=#{applyCode}
+			</if>
+			<if test="contactNumber!=null and contactNumber!='' "  >
+				AND j.contact_number=#{contactNumber}
+			</if>
+			<if test="workCompany!=null and workCompany!='' "  >
+				AND j.work_company=#{workCompany}
+			</if>
+			<if test="houseType!=null and houseType!='' "  >
+				AND j.house_type=#{houseType}
+			</if>
+			<if test="jzFqQs!=null and jzFqQs!='' "  >
+				AND j.jz_fq_qs=#{jzFqQs}
+			</if>
+			<if test="jzFqRate!=null and jzFqRate!='' "  >
+				AND j.jz_fq_rate=#{jzFqRate}
+			</if>
+			<if test="jzFqMoney!=null and jzFqMoney!='' "  >
+				AND j.jz_fq_money=#{jzFqMoney}
+			</if>
+			<if test="jzSpMoney!=null and jzSpMoney!='' "  >
+				AND jz_sp_money=#{jzSpMoney}
+			</if>
+			<if test="passDate!=null and passDate!='' "  >
+				AND j.pass_date=#{passDate}
+			</if>
+			<if test="firstTeTime!=null and firstTeTime!='' "  >
+				AND j.first_te_time=#{firstTeTime}
+			</if>
+			<if test="firstTeMoney!=null and firstTeMoney!='' "  >
+				AND j.first_te_money=#{firstTeMoney}
+			</if>
+			<if test="secondTeTime!=null and secondTeTime!='' "  >
+				AND j.second_te_time=#{secondTeTime}
+			</if>
+			<if test="secondTeMoney!=null and secondTeMoney!='' "  >
+				AND j.second_te_money=#{secondTeMoney}
+			</if>
+			<if test="surplusMoney!=null and surplusMoney!='' "  >
+				AND j.surplus_money=#{surplusMoney}
+			</if>
+			<if test="operater!=null and operater!='' "  >
+				AND j.operater=#{operater}
+			</if>
+			<if test="firstZyFlag!=null and firstZyFlag!='' "  >
+				AND j.first_zy_flag=#{firstZyFlag}
+			</if>
+			<if test="secondZyFlag!=null and secondZyFlag!='' "  >
+				AND j.second_zy_flag=#{secondZyFlag}
+			</if>
+			<if test="edEndTime!=null and edEndTime!='' "  >
+				AND j.ed_end_time=#{edEndTime}
+			</if>
+			<if test="cardNumber!=null and cardNumber!='' "  >
+				AND j.card_number=#{cardNumber}
+			</if>
+			<if test="governor!=null and governor!='' "  >
+				AND j.governor=#{governor}
+			</if>
+			<if test="acceptorg!=null and acceptorg!='' "  >
+				AND j.acceptorg=#{acceptorg}
+			</if>
+			<if test="yxqd!=null and yxqd!='' "  >
+				AND j.yxqd=#{yxqd}
+			</if>
+			<if test="isGd!=null and isGd!='' "  >
+				AND j.is_gd=#{isGd}
+			</if>
+			<if test="guidangDate!=null and guidangDate!='' "  >
+				AND j.guidang_date=#{guidangDate}
+			</if>
+			<if test="validDays!=null and validDays!=0 "  >
+				AND j.ed_end_time &gt;= now()
+				AND #{validDays} &gt;= DATEDIFF(j.ed_end_time,now())
+			</if>
+		</where>
+
+		<if test="sort!= null">
+		order by ${sort} ${order}
+		</if>
+		<if test="limit != 0">
+
+			limit #{offset},#{limit}
+		</if>
+	</select>
+
+	<!--统计-->
+	<select id="count" parameterType="com.zycx.system.sys.entity.QueryJzBaseInfo" resultType="int">
+		SELECT count(*) FROM jz_base_info
+		WHERE 1=1
+		<if test="employeeId!=null and employeeId!='' ">
+		AND employee_id=#{employeeId}
+		</if>
+		<if test="employeeName!=null and employeeName!='' ">
+		AND employee_name=#{employeeName}
+		</if>
+		<if test="jjType!=null and jjType!='' ">
+		AND jj_type=#{jjType}
+		</if>
+		<if test="bankInfoId!=null and bankInfoId!='' ">
+		AND bankInfo_id=#{bankInfoId}
+		</if>
+		<if test="jjStartTime!=null and jjStartTime!='' and jjEndTime!=null and jjEndTime!=''"  >
+			AND jj_time BETWEEN #{jjStartTime} AND #{jjEndTime}
+		</if>
+		<if test="customerName!=null and customerName!='' ">
+		AND customer_name=#{customerName}
+		</if>
+		<if test="identityCode!=null and identityCode!='' ">
+		AND identity_code=#{identityCode}
+		</if>
+		<if test="applyCode!=null and applyCode!='' ">
+		AND apply_code=#{applyCode}
+		</if>
+		<if test="contactNumber!=null and contactNumber!='' ">
+		AND contact_number=#{contactNumber}
+		</if>
+		<if test="workCompany!=null and workCompany!='' ">
+		AND work_company=#{workCompany}
+		</if>
+		<if test="houseType!=null and houseType!='' ">
+		AND house_type=#{houseType}
+		</if>
+		<if test="jzFqQs!=null and jzFqQs!='' ">
+		AND jz_fq_qs=#{jzFqQs}
+		</if>
+		<if test="jzFqRate!=null and jzFqRate!='' ">
+		AND jz_fq_rate=#{jzFqRate}
+		</if>
+		<if test="jzFqMoney!=null and jzFqMoney!='' ">
+		AND jz_fq_money=#{jzFqMoney}
+		</if>
+		<if test="jzSpMoney!=null and jzSpMoney!='' ">
+		AND jz_sp_money=#{jzSpMoney}
+		</if>
+		<if test="passDate!=null and passDate!='' ">
+		AND pass_date=#{passDate}
+		</if>
+		<if test="firstTeTime!=null and firstTeTime!='' ">
+		AND first_te_time=#{firstTeTime}
+		</if>
+		<if test="firstTeMoney!=null and firstTeMoney!='' ">
+		AND first_te_money=#{firstTeMoney}
+		</if>
+		<if test="secondTeTime!=null and secondTeTime!='' ">
+		AND second_te_time=#{secondTeTime}
+		</if>
+		<if test="secondTeMoney!=null and secondTeMoney!='' ">
+		AND second_te_money=#{secondTeMoney}
+		</if>
+		<if test="surplusMoney!=null and surplusMoney!='' ">
+		AND surplus_money=#{surplusMoney}
+		</if>
+		<if test="operater!=null and operater!='' ">
+		AND operater=#{operater}
+		</if>
+		<if test="firstZyFlag!=null and firstZyFlag!='' ">
+		AND first_zy_flag=#{firstZyFlag}
+		</if>
+		<if test="secondZyFlag!=null and secondZyFlag!='' ">
+		AND second_zy_flag=#{secondZyFlag}
+		</if>
+		<if test="edEndTime!=null and edEndTime!='' ">
+		AND ed_end_time=#{edEndTime}
+		</if>
+		<if test="cardNumber!=null and cardNumber!='' ">
+			AND card_number=#{cardNumber}
+		</if>
+		<if test="governor!=null and governor!='' ">
+			AND governor=#{governor}
+		</if>
+		<if test="acceptorg!=null and acceptorg!='' ">
+			AND acceptorg=#{acceptorg}
+		</if>
+		<if test="yxqd!=null and yxqd!='' ">
+			AND yxqd=#{yxqd}
+		</if>
+		<if test="isGd!=null and isGd!='' ">
+			AND is_gd=#{isGd}
+		</if>
+		<if test="guidangDate!=null and guidangDate!='' ">
+			AND guidang_date=#{guidangDate}
+		</if>
+		<if test="validDays!=null and validDays!=0 "  >
+			AND ed_end_time &gt;= now()
+			AND #{validDays} &gt;= DATEDIFF(ed_end_time,now())
+		</if>
+	</select>
+
+	<!--查询-->
+	<select id="query" parameterType="com.zycx.system.sys.entity.QueryJzBaseInfo" resultMap="JzBaseInfoMap">
+		SELECT
+		j.id,
+		j.employee_id,
+		j.employee_name,
+		b.bank_name,
+		j.jj_type,
+		j.bankInfo_id,
+		j.jj_time,
+		j.customer_name,
+		j.identity_code,
+		j.apply_code,
+		j.contact_number,
+		j.work_company,
+		j.house_type,
+		j.jz_fq_qs,
+		j.jz_fq_rate,
+		j.jz_fq_money,
+		j.jz_sp_money,
+		j.pass_date,
+		j.first_te_time,
+		j.first_te_money,
+		j.second_te_time,
+		j.second_te_money,
+		j.surplus_money,
+		j.operater,
+		j.first_zy_flag,
+		j.second_zy_flag,
+		j.ed_end_time,
+		j.card_number,
+		j.governor,
+		j.acceptorg,
+		j.yxqd,
+		j.is_gd,
+		j.guidang_date,
+		( SELECT d.text FROM dict d WHERE d.id = b.parent_id AND d.type = 'BANK_INFO' ) parentBankName,
+		DATEDIFF( j.ed_end_time, now( ) ) validDays
+		FROM
+		jz_base_info j
+		LEFT JOIN bank_info b ON j.bankInfo_id = b.id
+		<where>
+			<if test="employeeId!=null and employeeId!='' ">
+				AND j.employee_id=#{employeeId}
+			</if>
+			<if test="employeeName!=null and employeeName!='' ">
+				AND j.employee_name=#{employeeName}
+			</if>
+			<if test="jjType!=null and jjType!='' ">
+				AND j.jj_type=#{jjType}
+			</if>
+			<if test="bankInfoId!=null and bankInfoId!='' ">
+				AND j.bankInfo_id=#{bankInfoId}
+			</if>
+			<if test="jjStartTime!=null and jjStartTime!='' and jjEndTime!=null and jjEndTime!=''"  >
+				AND j.jj_time BETWEEN #{jjStartTime} AND #{jjEndTime}
+			</if>
+			<if test="customerName!=null and customerName!='' ">
+				AND j.customer_name=#{customerName}
+			</if>
+			<if test="identityCode!=null and identityCode!='' ">
+				AND j.identity_code=#{identityCode}
+			</if>
+			<if test="applyCode!=null and applyCode!='' ">
+				AND j.apply_code=#{applyCode}
+			</if>
+			<if test="contactNumber!=null and contactNumber!='' ">
+				AND j.contact_number=#{contactNumber}
+			</if>
+			<if test="workCompany!=null and workCompany!='' ">
+				AND j.work_company=#{workCompany}
+			</if>
+			<if test="houseType!=null and houseType!='' ">
+				AND j.house_type=#{houseType}
+			</if>
+			<if test="jzFqQs!=null and jzFqQs!='' ">
+				AND j.jz_fq_qs=#{jzFqQs}
+			</if>
+			<if test="jzFqRate!=null and jzFqRate!='' ">
+				AND j.jz_fq_rate=#{jzFqRate}
+			</if>
+			<if test="jzFqMoney!=null and jzFqMoney!='' ">
+				AND j.jz_fq_money=#{jzFqMoney}
+			</if>
+			<if test="jzSpMoney!=null and jzSpMoney!='' ">
+				AND j.jz_sp_money=#{jzSpMoney}
+			</if>
+			<if test="passDate!=null and passDate!='' ">
+				AND j.pass_date=#{passDate}
+			</if>
+			<if test="firstTeTime!=null and firstTeTime!='' ">
+				AND j.first_te_time=#{firstTeTime}
+			</if>
+			<if test="firstTeMoney!=null and firstTeMoney!='' ">
+				AND j.first_te_money=#{firstTeMoney}
+			</if>
+			<if test="secondTeTime!=null and secondTeTime!='' ">
+				AND j.second_te_time=#{secondTeTime}
+			</if>
+			<if test="secondTeMoney!=null and secondTeMoney!='' ">
+				AND j.second_te_money=#{secondTeMoney}
+			</if>
+			<if test="surplusMoney!=null and surplusMoney!='' ">
+				AND j.surplus_money=#{surplusMoney}
+			</if>
+			<if test="operater!=null and operater!='' ">
+				AND j.operater=#{operater}
+			</if>
+			<if test="firstZyFlag!=null and firstZyFlag!='' ">
+				AND j.first_zy_flag=#{firstZyFlag}
+			</if>
+			<if test="secondZyFlag!=null and secondZyFlag!='' ">
+				AND j.second_zy_flag=#{secondZyFlag}
+			</if>
+			<if test="edEndTime!=null and edEndTime!='' ">
+				AND j.ed_end_time=#{edEndTime}
+			</if>
+			<if test="cardNumber!=null and cardNumber!='' ">
+				AND j.card_number=#{cardNumber}
+			</if>
+			<if test="governor!=null and governor!='' ">
+				AND j.governor=#{governor}
+			</if>
+			<if test="acceptorg!=null and acceptorg!='' ">
+				AND j.acceptorg=#{acceptorg}
+			</if>
+			<if test="yxqd!=null and yxqd!='' ">
+				AND j.yxqd=#{yxqd}
+			</if>
+			<if test="isGd!=null and isGd!='' ">
+				AND j.is_gd=#{isGd}
+			</if>
+			<if test="guidangDate!=null and guidangDate!='' ">
+				AND j.guidang_date=#{guidangDate}
+			</if>
+			<if test="validDays!=null and validDays!=0 "  >
+				AND j.ed_end_time &gt;= now()
+				AND #{validDays} &gt;= DATEDIFF(j.ed_end_time,now())
+			</if>
+		</where>
+		<if test="sort!= null">
+		order by ${sort} ${order}
+		</if>
+	</select>
+</mapper>

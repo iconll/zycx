@@ -1,0 +1,450 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="include/includebase"></head>
+<!--分期通基础数据统计（报表）-->
+<body>
+<div class="panel-body" style="padding-bottom:0px;">
+        <div class="panel panel-default" style="margin-top: 10px;">
+            <div class="panel-heading">
+                查询条件
+            </div>
+            <div class="panel-body">
+                <input type="hidden" id = "hidReportType" value = "yg"/>
+                <form class="form-inline" role="form" style="float: left; width: 100%;margin-left: 20px;" method="post" id="queryFqtBaseInfo">
+                    <div class="form-group">
+                        <label for="reportType">报表类型:</label>
+                        <select id = "reportType" name = "reportType" class="form-control">
+                            <!--<option value="kh">客户</option>-->
+                            <option value="yg">员工</option>
+                            <option value="wd">网点</option>
+                        </select>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    </div>
+                    <div class="form-group">
+                        <label for="teMonth">调额时间:</label>
+                        <input type="text" class="form-control" name="teMonth" id="teMonth" readonly/>
+                    </div>
+                    <div class="form-group" style="display: none">
+                        <label for="zyMonth">支用时间:</label>
+                        <input type="text" class="form-control" name="zyMonth" id="zyMonth" readonly/>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="button" id="queryBtn" onclick="doQuery();" class="btn btn-primary">查询</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <table id="fqtBaseInfo-table" style="margin-top: -50px;">
+        </table>
+</div>
+<script th:inline="javascript">
+    $(function() {
+        $("#teMonth").datetimepicker({
+            format: "yyyy-mm",
+            weekStart: 1,
+            autoclose: true,
+            startView: 3,
+            minView: 3,
+            forceParse: false,
+            language: 'zh-CN'
+        });
+        $("#zyMonth").datetimepicker({
+            format: "yyyy-mm",
+            weekStart: 1,
+            autoclose: true,
+            startView: 3,
+            minView: 3,
+            forceParse: false,
+            language: 'zh-CN'
+        });
+        $("#teMonth").datetimepicker("setDate", new Date());
+        initYGTable();
+        //处理表头和内容对不齐
+        $(window).resize(function(){
+            clTable();
+        });
+    });
+    function doQuery(){
+
+        //获取本次table显示的报表类型
+        var hidReportType = $("#hidReportType").val();
+        //获取当前类型选择框选中的报表类型
+        var reportType = $("#reportType option:selected").val();
+
+        //判断报表类型是否发生改变
+        if(hidReportType == reportType){
+            //如果没有发生改变就刷新表格,重新加载数据
+            $('#fqtBaseInfo-table').bootstrapTable('refresh');    //刷新表格
+        }else{
+            //如果类型发生改变就展示对应的table
+            if(reportType == 'kh'){//客户
+                initKHTable();
+            }else if(reportType == 'yg'){//员工
+                initYGTable();
+            }else if(reportType == 'wd'){//网点
+                initWDTable();
+            }
+
+            $("#hidReportType").val(reportType);//设置新的value
+        }
+    }
+    //初始化报表类型为客户的Table
+    function initKHTable(){
+        //初始化前先将table销毁
+        $('#fqtBaseInfo-table').bootstrapTable('destroy');
+        var fqtTable = $('#fqtBaseInfo-table').bootstrapTable({
+            url:"/fqtBaseInfo/loadReportData",
+            height: $(window.parent.document).find("#wrapper").height(),
+            width:$(window).width(),
+            showColumns:true,
+            formId :"queryFqtBaseInfo",
+            pagination : true,
+            sortName : 'id',
+            sortOrder : 'desc',
+            clickToSelect: true,// 单击某一行的时候选中某一条记录
+            pageSize : 10,
+            toolbars:[
+                {
+                    text: '导出',
+                    iconCls: 'glyphicon glyphicon-share',
+                    handler: function () {
+                        window.location.href = "/excelManage/exportExcel?key=fqt_khReportExport&zyMonth=" + $("#zyMonth").val();
+                    }
+                }
+            ],
+            columns: [
+                {
+                    field: '',
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index+1;
+                    }
+                },
+                {
+                    field : 'applyCode',
+                    title : '申请编码',
+                    align : 'center',
+                    valign : 'middle',
+                    hide : false
+                },
+                {
+                    field : 'salesman',
+                    title : '营销员',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'bankName',
+                    title : '网点名称',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'parentBankName',
+                    title : '所属管辖支行',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'jjTime',
+                    title : '进件时间',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'customerName',
+                    title : '客户姓名',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'identityCode',
+                    title : '客户身份证号码',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'contactNumber',
+                    title : '联系电话',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'fqqs',
+                    title : '分期期数',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'fqRate',
+                    title : '费率(%)',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'fqMoney',
+                    title : '分期金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'teTime',
+                    title : '调额时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'teMoney',
+                    title : '调额金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'tezsMoney',
+                    title : '调额中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'dyzyMoney',
+                    title : '当月支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'dyzyzsMoney',
+                    title : '当月支用中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'disburseMoney',
+                    title : '累计支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'disburseZSMoney',
+                    title : '累计支用中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'surplusMoney',
+                    title : '剩余可用额度',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'syzsMoney',
+                    title : '剩余中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'zyRate',
+                    title : '支用率(%)',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'cardNumber',
+                    title : '卡号',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'expiryDate',
+                    title : '额度失效时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'validDays',
+                    title : '额度剩余有效天数',
+                    align : 'center',
+                    valign : 'middle',
+                    formatter: function (value, row, index) {
+                        if(value != null){
+                            var num = new Number(value);
+                            if(num <= 0){
+
+                                return "<span>已失效</span>";
+                            }else{
+
+                                return "<span>"+value+"</span>";
+                            }
+                        }else {
+                            return "-";
+                        }
+                    }
+                }],
+            onPostHeader:function(){
+                clTable();
+            }
+        });
+    }
+    //初始化报表类型为员工的Table
+    function initYGTable(){
+        $('#fqtBaseInfo-table').bootstrapTable('destroy');
+        var fqtTable = $('#fqtBaseInfo-table').bootstrapTable({
+            url:"/fqtBaseInfo/loadReportData",
+            height: $(window.parent.document).find("#wrapper").height() - 252,
+            width:$(window).width(),
+            showColumns:true,
+            formId :"queryFqtBaseInfo",
+            pagination : true,
+            sortName : 'id',
+            sortOrder : 'desc',
+            clickToSelect: true,// 单击某一行的时候选中某一条记录
+            pageSize : 10,
+            toolbars:[
+                {
+                    text: '导出Excel',
+                    iconCls: 'glyphicon glyphicon-share',
+                    handler: function () {
+                        window.location.href = "/excelManage/exportExcel?key=fqt_ygReportExport&teMonth=" + $("#teMonth").val() + "&zyMonth" + $("#zyMonth").val();
+                    }
+                }
+            ],
+            columns: [
+                {
+                    field: '',
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index+1;
+                    }
+                },{
+                    field : 'salesman',
+                    title : '营销员',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'teMoney',
+                    title : '调额金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'tezsMoney',
+                    title : '调额中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'dyzyMoney',
+                    title : '当月支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'dyzyzsMoney',
+                    title : '当月支用中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'disburseMoney',
+                    title : '累计支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'disburseZSMoney',
+                    title : '累计支用中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'surplusMoney',
+                    title : '剩余可用额度',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'syzsMoney',
+                    title : '剩余中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'zyRate',
+                    title : '支用率(%)',
+                    align : 'center',
+                    valign : 'middle'
+                }],
+            onPostHeader:function(){
+                clTable();
+            }
+        });
+    }
+    //初始化报表类型为网点的Table
+    function initWDTable(){
+        $('#fqtBaseInfo-table').bootstrapTable('destroy');
+        var fqtTable = $('#fqtBaseInfo-table').bootstrapTable({
+            url:"/fqtBaseInfo/loadReportData",
+            height: $(window.parent.document).find("#wrapper").height() - 252,
+            width:$(window).width(),
+            showColumns:true,
+            formId :"queryFqtBaseInfo",
+            pagination : true,
+            sortName : 'id',
+            sortOrder : 'desc',
+            clickToSelect: true,// 单击某一行的时候选中某一条记录
+            pageSize : 10,
+            toolbars:[
+                {
+                    text: '导出Excel',
+                    iconCls: 'glyphicon glyphicon-share',
+                    handler: function () {
+                        window.location.href = "/excelManage/exportExcel?key=fqt_wdReportExport&teMonth=" + $("#teMonth").val() + "&zyMonth" + $("#zyMonth").val();
+                    }
+                }
+            ],
+            columns: [
+                {
+                    field: '',
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index+1;
+                    }
+                },{
+                    field : 'bankName',
+                    title : '网点名称',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'parentBankName',
+                    title : '所属管辖支行',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'teMoney',
+                    title : '调额金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'tezsMoney',
+                    title : '调额中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'dyzyMoney',
+                    title : '当月支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'dyzyzsMoney',
+                    title : '当月支用中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'disburseMoney',
+                    title : '累计支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'disburseZSMoney',
+                    title : '累计支用中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'surplusMoney',
+                    title : '剩余可用额度',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'syzsMoney',
+                    title : '剩余中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'zyRate',
+                    title : '支用率(%)',
+                    align : 'center',
+                    valign : 'middle'
+                }],
+            onPostHeader:function(){
+                clTable();
+            }
+        });
+    }
+</script>
+</body>
+</html>

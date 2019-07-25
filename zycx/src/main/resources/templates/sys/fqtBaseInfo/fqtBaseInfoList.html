@@ -1,0 +1,420 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="include/includebase"></head>
+<style type="text/css">
+
+    .select2-container .select2-selection--single{
+        display: block;
+        width: 100%;
+        height: 34px;
+        padding: 3px 5px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+        box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+        -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+        -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+        transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    }
+    .form-group{
+        margin-bottom: 10px !important;
+    }
+
+    .dropdown-menu li{
+        border-bottom: solid 1px #e5e5e5;
+        padding: 1px;
+    }
+</style>
+<!--分期通基础数据管理-->
+<body>
+<div class="panel-body" style="padding-bottom:0px;">
+        <div class="panel panel-default" style="margin-top: 10px;">
+            <div class="panel-heading">
+                数据导入
+                <ul class="nav navbar-right top-nav" style="margin-top:-10px;">
+                    <li>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <font>模板下载</font>
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="/excel-templates/template-fqtBase.xls">基础数据导入模板</a>
+                            </li>
+                            <li>
+                                <a href="/excel-templates/template-fqtKh.xls">卡号数据导入模板</a>
+                            </li>
+                            <li>
+                                <a href="/excel-templates/template-fqtKyed.xls">可用额度数据导入模板</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class="panel-body row">
+                <div class="col-md-4">
+                    <label for="baseDataImport">基础数据导入:</label>
+                    <input id="baseDataImport" type="file" class="file-loading form-control" data-preview-file-type="text" name="baseDataImport" class="input-xlarge">
+                </div>
+                <div class="col-md-4">
+                    <label for="khDataImport">卡号数据导入:</label>
+                    <input id="khDataImport" type="file" class="file-loading form-control" data-preview-file-type="text" name="khDataImport" class="input-xlarge">
+                </div>
+                <div class="col-md-4">
+                    <label for="kyedDataImport">可用额度数据导入:</label>
+                    <input id="kyedDataImport" type="file" class="file-loading form-control" data-preview-file-type="text" name="kyedDataImport" class="input-xlarge"   >
+                </div>
+            </div>
+            <div class="panel-heading">
+                查询条件
+            </div>
+            <div class="panel-body">
+                <form class="form-inline" role="form" style="float: left; width: 100%;margin-left: 20px;margin-bottom: -20px;" method="post" id="queryFqtBaseInfo">
+                        <div class="form-group">
+                            <label for="salesman">营销员姓名:</label>
+                            <input type="text" class="form-control" name="salesman" id="salesman"  placeholder="请输入营销员姓名" />
+                        </div>
+                        <div class="form-group">
+                            <label for="applyCode">申请编码:</label>
+                            <input type="text" class="form-control" name="applyCode" id="applyCode"  placeholder="请输入申请编码" />
+                        </div>
+                        <div class="form-group">
+                            <label for="customerName">客户姓名:</label>
+                            <input type="text" class="form-control" name="customerName" id="customerName"  placeholder="请输入客户姓名" />
+                        </div>
+                        <div class="form-group">
+                            <label for="bankInfoId">网点名称:</label>
+                            <select name = "bankInfoId" id = "bankInfoId" class="select2_group form-control"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="jjStartTime">进件开始时间:</label>
+                            <input type="text" class="form-control" name="jjStartTime" id="jjStartTime"  placeholder="请选择进件开始时间" readonly />
+                            ~
+                            <input type="text" class="form-control" name="jjEndTime" id="jjEndTime"  placeholder="请选择进件结束时间" readonly/>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" id="queryBtn" onclick="doQuery();" class="btn btn-primary">查询</button>
+                        </div>
+                </form>
+            </div>
+        </div>
+        <table id="fqtBaseInfo-table" style="margin-top: -50px;">
+        </table>
+</div>
+<script th:inline="javascript">
+    $(function() {
+        //加载进件开始时间和结束时间选择框
+        loadStartAndEndDatetimepicker("jjStartTime","jjEndTime");
+        //初始化数据表格
+        initTable();
+
+        //处理表头和内容对不齐
+        $(window).resize(function(){
+            clTable();
+        });
+        //分期通基础数据上传
+        showUploadExcel("baseDataImport","/excelManage/importFqtBaseData","fqt_base_data");
+        //分期通卡号数据上传
+        showUploadExcel("khDataImport","/excelManage/importFqtKHData","fqt_kh_data");
+        //分期通可用额度数据上传
+        showUploadExcel("kyedDataImport","/excelManage/importFqtKYEDData","fqt_kyed_data");
+
+        $("#bankInfoId").select2({
+            width:200,
+            placeholder: "请选择网点名称",
+            allowClear: true
+        });
+        //加载选择框数据
+        loadBankInfoSelectOption("bankInfoId");
+    });
+    /**
+     * 导入Excel弹出提示窗口
+     * @param content
+     */
+    function showLayerWindow(content){
+        /*var pWidth = $(".panel-body").width() * 0.3;
+        var pHeight = $(".panel-body").height() * 0.25;*/
+
+        var _scrollHeight = $(document).scrollTop(),//获取当前窗口距离页面顶部高度
+            _windowHeight = $(window).height(),//获取当前窗口高度
+            _windowWidth = $(window).width(),//获取当前窗口宽度
+            _popupHeight = 450,//获取弹出层高度
+            _popupWeight = 300;//获取弹出层宽度
+        var _posiTop = (_windowHeight - _popupHeight)/2 + _scrollHeight;
+        var _posiLeft = (_windowWidth - _popupWeight)/2;
+
+        layer.open({
+            type: 1,
+            skin: 'layui-layer-lan', //样式类名
+            anim: 2,
+            offset:[_posiTop,_posiLeft],
+            area: ['450px', '300px'],
+            shadeClose: true, //开启遮罩关闭
+            content: content
+        });
+    }
+    function showUploadExcel(id,url,key){
+        $("#" + id).fileinput({
+            language: 'zh', //设置语言
+            uploadUrl:url, //上传的地址
+            uploadExtraData:{"key": key},
+            allowedFileExtensions: ['xls'],//接收的文件后缀
+            uploadAsync: true, //默认异步上传
+            showUpload:true, //是否显示上传按钮
+            showRemove:true, //显示移除按钮
+            showPreview:false, //是否显示预览
+            showCaption:true,//是否显示标题
+            browseClass:"btn btn-primary", //按钮样式
+            dropZoneEnabled: false,//是否显示拖拽区域
+            autoReplace:true,//是否自动替换，当为true时，再次选择文件时，会将当前的文件替换掉。
+            maxFileCount:1, //表示允许同时上传的最大文件个数
+            maxFileSize:10240,//文件大小
+            enctype:'multipart/form-data',
+            validateInitialCount:true,
+            previewFileIcon: "<iclass='glyphicon glyphicon-king'></i>",
+            msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+            msgSizeTooLarge: "文件\"{name}\"(<b>{size} KB</b>) 超过了允许大小 <b>{maxSize} KB</b>.",
+            msgInvalidFileType:"不正确的类型 \"{name}\". 只支持 \"{types}\" 类型的文件.",
+            msgInvalidFileExtension:"不正确的文件扩展名 \"{name}\". 只支持 \"{extensions}\" 的文件扩展名.",
+        }).on("fileuploaded", function (event, data, previewId, index){
+            //处理成功
+            if(data.response.result){
+
+                var tipInfo = "";
+
+                for(var i = 0;i < data.response.data.length;i++){
+
+                    var errorMsg = data.response.data[i];
+
+                    tipInfo = tipInfo + errorMsg + "</br>";
+                }
+                showLayerWindow(tipInfo);//显示消息提示框
+                doQuery();//重新加载数据列表
+            }else{
+                //$(event.target).parent().siblings('.fileinput-upload').hide();
+                //弹出消息提示框
+                window.Ewin.alert({message:data.response.msg});
+            }
+            $(event.target).fileinput('clear').fileinput('unlock');
+        }).on('fileerror', function(event, data, msg){
+
+            window.Ewin.alert({message:"操作失败！"});
+        }).on("filebatchselected", function(event, files) {
+
+            //处理上传文件类型限制
+            $.each(event.currentTarget.files,function(index,item){
+
+                if(item.type != 'application/vnd.ms-excel' || item.size > 10240000){
+                    $(event.target).parent().siblings('.fileinput-upload').hide();
+                }else{
+                    $(event.target).parent().siblings('.fileinput-upload').show();
+                }
+            });
+        });
+    }
+    function doQuery(){
+        $('#fqtBaseInfo-table').bootstrapTable('refresh');    //刷新表格
+    }
+
+    function initTable(){
+        $('#fqtBaseInfo-table').bootstrapTable('destroy');
+        var fqtTable = $('#fqtBaseInfo-table').bootstrapTable({
+            url:"/fqtBaseInfo/list",
+            height: $(window.parent.document).find("#wrapper").height(),
+            width:$(window).width(),
+            showColumns:true,
+            formId :"queryFqtBaseInfo",
+            pagination : true,
+            sortName : 'id',
+            sortOrder : 'desc',
+            clickToSelect: true,// 单击某一行的时候选中某一条记录
+            pageSize : 10,
+            toolbars:[
+                {
+                    text: '修改',
+                    iconCls: 'glyphicon glyphicon-pencil',
+                    handler: function () {
+                        var rows = $('#fqtBaseInfo-table').bootstrapTable('getSelections');
+                        if(rows.length==0||rows.length>1){
+                            window.Ewin.alert({message:'请选择一条需要修改的数据!'});
+                            return false;
+                        }
+                        window.Ewin.dialog({title:"修改",url:"fqtBaseInfo/updatePage?id="+rows[0].id,width:600,height:595});
+                    }
+                },
+                {
+                    text: '删除',
+                    iconCls: 'glyphicon glyphicon-remove',
+                    handler: function () {
+                        var rows = $('#fqtBaseInfo-table').bootstrapTable('getSelections');
+                        if(rows.length==0){
+                            window.Ewin.alert({message:'请选择一条需要删除的数据!'});
+                            return false;
+                        }
+                        window.Ewin.confirm({title:'提示',message:'是否要删除您当前所勾选的数据？',width:500}).on(function (e) {
+                            if (e) {
+                                $.post("fqtBaseInfo/removeBath",{json:JSON.stringify(rows)},function(e){
+                                    if(e.result){
+                                        window.Ewin.alert({message:e.msg});
+                                        doQuery();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            ],
+            columns: [
+                {
+                    checkbox: true
+                },
+                {
+                    field: '',
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index+1;
+                    }
+                },
+                {
+                    field : 'applyCode',
+                    title : '申请编码',
+                    align : 'center',
+                    valign : 'middle',
+                    hide : false
+                },
+                {
+                    field : 'salesman',
+                    title : '营销员',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'bankName',
+                    title : '网点名称',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'parentBankName',
+                    title : '所属管辖支行',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'jjTime',
+                    title : '进件时间',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'customerName',
+                    title : '客户姓名',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'identityCode',
+                    title : '客户身份证号码',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'contactNumber',
+                    title : '联系电话',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'fqqs',
+                    title : '分期期数',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'fqRate',
+                    title : '费率(%)',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'fqMoney',
+                    title : '分期金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'teTime',
+                    title : '调额时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'teMoney',
+                    title : '调额金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'tezsMoney',
+                    title : '调额中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'surplusMoney',
+                    title : '剩余可用额度',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'syzsMoney',
+                    title : '剩余中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'disburseMoney',
+                    title : '支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'disburseZSMoney',
+                    title : '支用中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'cardNumber',
+                    title : '卡号',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'expiryDate',
+                    title : '额度失效时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'validDays',
+                    title : '额度剩余有效天数',
+                    align : 'center',
+                    valign : 'middle',
+                    formatter: function (value, row, index) {
+                        if(value != null){
+                            var num = new Number(value);
+                            if(num <= 0){
+
+                                return "<span>已失效</span>";
+                            }else{
+
+                                return "<span>"+value+"</span>";
+                            }
+                        }else {
+                            return "-";
+                        }
+                    }
+                }],
+            onPostHeader:function(){
+                clTable();
+            }
+        });
+
+    }
+
+
+</script>
+</body>
+</html>

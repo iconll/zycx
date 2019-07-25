@@ -1,0 +1,196 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:include="include/includebase"></head>
+<body>
+<!--修改用户密码-->
+    <div class="row" style="margin-left: 15px;margin-right:20px;margin-top:10px;">
+        <form id="userForm"  role="form" method="post" action="user/updatePassword">
+            <div class="form-group">
+                <label for="login">账号:</label>
+                <input type="text" class="form-control" name="login" id="login" th:value="${#authentication.name}" readonly />
+            </div>
+            <div class="form-group" >
+                <label for="oldPassword"><span style="color:red">*</span>当前密码:</label>
+                <input type="password" class="form-control" name="oldPassword" id="oldPassword"  placeholder="请输入当前密码" />
+            </div>
+            <div class="form-group" >
+                <label for="password"><span style="color:red">*</span>新密码:</label>
+                <input type="password" class="form-control" name="password" id="password"  placeholder="请输入密码" />
+            </div>
+            <div class="form-group" >
+                <label for="rePassword"><span style="color:red">*</span>核对密码:</label>
+                <input type="password" class="form-control" name="rePassword" id="rePassword"  placeholder="请输入核对密码" />
+            </div>
+        </form>
+        <div class="" >
+            <button type="button" id="updatePwd" class="btn btn-primary">提交</button>
+        </div>
+    </div>
+<script type="text/javascript">
+    $(function () {
+        $('#userForm').bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                login: {
+                    message:'账号不能为空',
+                    validators: {
+                        notEmpty: {
+                            message:'账号不能为空'
+                        }
+                    }
+                },
+                oldPassword: {
+                    message:'当前密码无效',
+                    validators: {
+                        notEmpty: {
+                            message: '当前密码不能为空'
+                        },
+                        stringLength: {
+                            min: 6,
+                            max: 30,
+                            message: '密码长度必须在6到30之间'
+                        },
+                        different: {//如果相同
+                            field: 'login',//需要进行比较的input name值
+                            message: '不能和用户名相同'
+                        },
+                        regexp: {
+                            regexp: /^[a-zA-Z0-9_\.]+$/,
+                            message: '密码必须是数字字母和下划线不能有特殊符号！'
+                        }
+                    }
+                },password: {
+                    message:'密码无效',
+                    validators: {
+                        notEmpty: {
+                            message: '密码不能为空'
+                        },
+                        stringLength: {
+                            min: 6,
+                            max: 30,
+                            message: '密码长度必须在6到30之间'
+                        },
+                        different: {//如果相同
+                            field: 'login',//需要进行比较的input name值
+                            message: '密码不能和账号相同'
+                        },
+                        regexp: {
+                            regexp: /^[a-zA-Z0-9_\.]+$/,
+                            message: '密码必须是数字字母和下划线不能有特殊符号！'
+                        }
+                    }
+                },
+                rePassword: {
+                    message: '密码无效',
+                    validators: {
+                        notEmpty: {
+                            message: '密码不能为空'
+                        },
+                        stringLength: {
+                            min: 6,
+                            max: 30,
+                            message: '密码长度必须在6到30之间'
+                        },
+                        identical: {//如果不相同
+                            field: 'password',
+                            message: '两次密码不一致'
+                        },
+                        different: {//如果相同
+                            field: 'login',
+                            message: '不能和用户名相同'
+                        },
+                        regexp: {//匹配规则
+                            regexp: /^[a-zA-Z0-9_\.]+$/,
+                            message: '密码必须是数字字母和下划线不能有特殊符号！'
+                        }
+                    }
+                }
+            }
+        })
+
+        $("#updatePwd").on('click',function(){
+
+            // 此段是为防止需要点击两次按钮来实现验证的方法，若不添加此处的放行，那么我们将要点击两次确定按钮才可以提交验证
+            var login = $("#login").val();
+            // 判断当前的code又值，且当前不存在错误验证方可放开该字段的验证
+            /*if(login != null && login != ""){
+                $('#userForm').bootstrapValidator('enableFieldValidators', 'login', false);
+            } else {
+                $('#userForm').bootstrapValidator('enableFieldValidators', 'login', true);
+            }*/
+            var bootstrapValidator = $("#userForm").data('bootstrapValidator');
+            bootstrapValidator.validate();
+            if(bootstrapValidator.isValid()){
+                //校验当前密码和新密码是否一致
+                var oldPassword = $("#oldPassword").val();
+                var password = $("#password").val();
+
+                if(oldPassword == password){
+
+                    layer.msg("新密码不能和当前密码一致", {icon: 2});
+                    return ;
+                }
+                $.post($("#userForm").attr('action'),$("#userForm").serialize(),function(e){
+                    console.log(e);
+                    if(e.success){
+                        //修改密码成功跳转到登录页面
+                        layer.msg(e.msg+",将跳转到登录页面.", {
+                            icon: 1,
+                            time: 2000 //2秒关闭（如果不配置，默认是3秒）
+                        }, function(){
+                            //关闭弹出层
+                            var index=parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                            //跳转到登录页面
+                            window.location.href = "/logout";
+                        });
+                    }else{
+                        //修改密码失败给出提示消息
+                        layer.msg(e.msg, {icon: 2});
+                    }
+                })
+            }
+        });
+    })
+    /**
+     * 修改用户密码
+     */
+    function commitUpdatePwd(){
+        // 此段是为防止需要点击两次按钮来实现验证的方法，若不添加此处的放行，那么我们将要点击两次确定按钮才可以提交验证
+        var login = $("#login").val();
+        // 判断当前的code又值，且当前不存在错误验证方可放开该字段的验证
+        if(login != null && login != ""){
+            $('#userForm').bootstrapValidator('enableFieldValidators', 'login', false);
+        } else {
+            $('#userForm').bootstrapValidator('enableFieldValidators', 'login', true);
+        }
+        var bootstrapValidator = $("#userForm").data('bootstrapValidator');
+        bootstrapValidator.validate();
+        if(bootstrapValidator.isValid()){
+            $.post($("#userForm").attr('action'),$("#userForm").serialize(),function(e){
+                console.log(e);
+                if(e.result.success){
+                    //修改密码成功跳转到登录页面
+                    layer.msg('同上', {
+                        icon: 1,
+                        time: 2000 //2秒关闭（如果不配置，默认是3秒）
+                    }, function(){
+                        //跳转到登录页面
+                        window.location.href = "/login";
+                    });
+                }else{
+                    //修改密码失败给出提示消息
+                    layer.msg(e.result.msg, {icon: 2});
+                }
+            })
+        }
+
+    }
+</script>
+</body>
+</html>

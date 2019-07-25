@@ -1,0 +1,61 @@
+Manifest-Version: 1.0
+Class-Path: swagger-annotations-1.5.10.jar mybatis-spring-1.3.1.jar ja
+ ckson-annotations-2.8.0.jar classmate-1.3.4.jar dom4j-1.6.1.jar tomca
+ t-embed-logging-juli-8.0.33.jar druid-1.1.3.jar hibernate-commons-ann
+ otations-5.0.1.Final.jar jboss-logging-3.3.1.Final.jar hibernate-enti
+ tymanager-5.0.12.Final.jar commons-beanutils-1.9.3.jar mybatis-spring
+ -boot-autoconfigure-1.3.1.jar spring-boot-starter-data-redis-1.5.9.RE
+ LEASE.jar spring-context-4.3.13.RELEASE.jar tomcat-juli-8.5.23.jar sp
+ ring-beans-4.3.13.RELEASE.jar spring-boot-starter-1.5.9.RELEASE.jar s
+ pring-data-rest-core-2.6.9.RELEASE.jar hibernate-validator-5.3.6.Fina
+ l.jar spring-core-4.3.13.RELEASE.jar tomcat-embed-websocket-8.5.23.ja
+ r hibernate-core-5.0.12.Final.jar spring-boot-starter-websocket-1.5.9
+ .RELEASE.jar tools.jar android-json-0.0.20131108.vaadin1.jar ezmorph-
+ 1.0.6.jar thymeleaf-spring4-2.1.6.RELEASE.jar mybatis-spring-boot-sta
+ rter-1.3.1.jar swagger-models-1.5.10.jar hibernate-jpa-2.1-api-1.0.0.
+ Final.jar thymeleaf-extras-springsecurity4-2.1.3.RELEASE.jar spring-t
+ x-4.3.13.RELEASE.jar springfox-spring-web-2.6.1.jar guava-18.0.jar sp
+ ringfox-swagger-ui-2.6.1.jar javax.inject-1.jar javax.servlet-api-3.1
+ .0.jar snakeyaml-1.17.jar poi-ooxml-3.17.jar commons-collections4-4.1
+ .jar commons-pool2-2.4.3.jar spring-boot-starter-web-1.5.9.RELEASE.ja
+ r groovy-2.4.13.jar spring-hateoas-0.23.0.RELEASE.jar spring-websocke
+ t-4.3.13.RELEASE.jar ognl-3.0.8.jar spring-boot-starter-jdbc-1.5.9.RE
+ LEASE.jar jackson-core-2.8.10.jar commons-logging-1.1.1.jar javax.tra
+ nsaction-api-1.2.jar spring-expression-4.3.13.RELEASE.jar hutool-all-
+ 3.0.9.jar spring-boot-starter-security-1.5.9.RELEASE.jar spring-secur
+ ity-web-4.2.3.RELEASE.jar antlr-2.7.7.jar tomcat-embed-core-8.5.23.ja
+ r spring-boot-starter-logging-1.5.9.RELEASE.jar springfox-core-2.6.1.
+ jar validation-api-1.1.0.Final.jar log4j-1.2.14.jar javassist-3.21.0-
+ GA.jar antlr-2.7.7.jar spring-aop-4.3.13.RELEASE.jar logback-core-1.1
+ .11.jar jandex-2.0.0.Final.jar spring-messaging-4.3.13.RELEASE.jar sp
+ ring-boot-starter-aop-1.5.9.RELEASE.jar spring-data-commons-1.13.9.RE
+ LEASE.jar springfox-schema-2.6.1.jar slf4j-api-1.7.25.jar spring-secu
+ rity-config-4.2.3.RELEASE.jar springfox-swagger2-2.6.1.jar spring-boo
+ t-starter-cache-1.5.9.RELEASE.jar ehcache-2.10.4.jar jackson-databind
+ -2.8.10.jar mysql-connector-java-5.1.41.jar stax-api-1.0.1.jar poi-oo
+ xml-schemas-3.17.jar spring-data-rest-webmvc-2.6.9.RELEASE.jar mapstr
+ uct-jdk8-1.1.0.Final.jar poi-3.17.jar mapstruct-1.0.0.Final.jar logba
+ ck-classic-1.1.11.jar log4j-over-slf4j-1.7.25.jar spring-boot-autocon
+ figure-1.5.9.RELEASE.jar spring-boot-starter-data-jpa-1.5.9.RELEASE.j
+ ar spring-webmvc-4.3.13.RELEASE.jar springfox-spi-2.6.1.jar tomcat-jd
+ bc-8.5.23.jar jcl-over-slf4j-1.7.25.jar jul-to-slf4j-1.7.25.jar commo
+ ns-lang-2.5.jar spring-boot-starter-thymeleaf-1.5.9.RELEASE.jar sprin
+ g-boot-1.5.9.RELEASE.jar spring-boot-devtools-1.5.9.RELEASE.jar sprin
+ g-plugin-metadata-1.2.0.RELEASE.jar mapstruct-processor-1.1.0.Final.j
+ ar curvesapi-1.04.jar jedis-2.9.0.jar commons-collections-3.2.2.jar x
+ ml-apis-1.4.01.jar spring-data-redis-1.8.9.RELEASE.jar spring-plugin-
+ core-1.2.0.RELEASE.jar thymeleaf-layout-dialect-1.4.0.jar jxl-2.6.12.
+ jar nekohtml-1.9.22.jar spring-security-core-4.2.3.RELEASE.jar aspect
+ jweaver-1.8.13.jar spring-context-support-4.3.13.RELEASE.jar mybatis-
+ 3.4.5.jar springfox-swagger-common-2.6.1.jar spring-oxm-4.3.13.RELEAS
+ E.jar jconsole.jar spring-aspects-4.3.13.RELEASE.jar tomcat-annotatio
+ ns-api-8.5.23.jar spring-orm-4.3.13.RELEASE.jar evo-inflector-1.2.2.j
+ ar spring-jdbc-4.3.13.RELEASE.jar spring-boot-starter-data-rest-1.5.9
+ .RELEASE.jar tomcat-embed-el-8.5.23.jar spring-boot-starter-tomcat-1.
+ 3.5.RELEASE.jar thymeleaf-2.1.6.RELEASE.jar xercesImpl-2.11.0.jar spr
+ ing-data-jpa-1.11.9.RELEASE.jar json-lib-2.4-jdk15.jar spring-data-ke
+ yvalue-1.2.9.RELEASE.jar xmlbeans-2.6.0.jar druid-spring-boot-starter
+ -1.1.3.jar commons-codec-1.10.jar unbescape-1.1.0.RELEASE.jar spring-
+ web-4.3.13.RELEASE.jar
+Main-Class: com.zycx.system.ZycxSystemApplication
+

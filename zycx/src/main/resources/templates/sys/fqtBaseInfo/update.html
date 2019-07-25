@@ -1,0 +1,265 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<body>
+<form id="fqtBaseInfoForm"  role="form" method="post" action="fqtBaseInfo/update">
+    <div class="row">
+        <div class="col-md-12">
+            <input type="hidden" name="id"  th:value="${entity.id}" />
+            <input type="hidden" name="source"  th:value="${entity.source}" />
+            <input type="hidden" name="record_person"  th:value="${entity.recordPerson}" />
+            <input type="hidden" name="import_time"  th:value="${entity.importTime}" />
+            <div class="form-group" >
+                <label for="applyCode"><span style="color:red;">*</span>申请编码:</label>
+                <input type="text" class="form-control" name="applyCode" id="applyCode" th:value="${entity.applyCode}"  placeholder="请输入申请编码" />
+            </div>
+            <div class="form-group">
+                <label for="salesman"><span style="color:red;">*</span>营销员姓名:</label>
+                <input type="text" class="form-control" name="salesman" id="salesman" th:value="${entity.salesman}" placeholder="请输入营销员姓名" />
+            </div>
+            <div class="form-group">
+                <label for="bankInfoId"><span style="color:red;">*</span>网点名称:</label>
+                <select name = "bankInfoId" id = "bankInfoId" class="form-control"></select>
+            </div>
+            <div class="form-group">
+
+                <label for="jjTime">进件时间:</label>
+                <input type="text" class="form-control" name="jjTime" id="jjTime" readonly />
+            </div>
+            <div class="form-group">
+                <label for="customerName">客户姓名:</label>
+                <input type="text" class="form-control" name="customerName" id="customerName" th:value="${entity.customerName}" placeholder="请输入客户姓名" />
+            </div>
+            <div class="form-group">
+                <label for="identityCode">身份证号码:</label>
+                <input type="text" class="form-control" name="identityCode" id="identityCode" th:value="${entity.identityCode}" placeholder="请输入身份证号码" />
+            </div>
+            <div class="form-group">
+                <label for="contactNumber">联系电话:</label>
+                <input type="text" class="form-control" name="contactNumber" id="contactNumber" th:value="${entity.contactNumber}" placeholder="请输入联系电话" />
+            </div>
+            <div class="form-group">
+                <label for="fqqs">分期期数:</label>
+                <input type="text" class="form-control" name="fqqs" id="fqqs" th:value="${entity.fqqs}" placeholder="请输入分期期数" />
+            </div>
+            <div class="form-group">
+                <label for="fqRate">费率:</label>
+                <input type="text" class="form-control" name="fqRate" id="fqRate" th:value="${entity.fqRate}" placeholder="请输入费率" />
+            </div>
+            <div class="form-group">
+                <label for="fqMoney">分期金额:</label>
+                <input type="text" class="form-control" name="fqMoney" id="fqMoney" th:value="${entity.fqMoney}" placeholder="请输入分期金额" />
+            </div>
+            <div class="form-group">
+                <label for="teTime"><span style="color:red;">*</span>调额时间:</label>
+                <input type="text" class="form-control" name="teTime" id="teTime"  readonly/>
+            </div>
+            <div class="form-group">
+                <label for="teMoney"><span style="color:red;">*</span>调额金额:</label>
+                <input type="text" class="form-control" name="teMoney" id="teMoney" th:value="${entity.teMoney}" placeholder="请输入调额金额" />
+            </div>
+            <div class="form-group">
+                <label for="surplusMoney"><span style="color:red;">*</span>剩余可用金额:</label>
+                <input type="text" class="form-control" name="surplusMoney" id="surplusMoney" th:value="${entity.surplusMoney}" placeholder="请输入剩余可用金额" />
+            </div>
+            <div class="form-group">
+                <label for="disburseMoney">支用金额:</label>
+                <input type="text" class="form-control" name="disburseMoney" id="disburseMoney" th:value="${entity.disburseMoney}" readonly/>
+            </div>
+            <div class="form-group">
+                <label for="cardNumber">卡号:</label>
+                <input type="text" class="form-control" name="cardNumber" id="cardNumber" th:value="${entity.cardNumber}" placeholder="请输入卡号" />
+            </div>
+            <div class="form-group">
+                <label for="expiryDate">额度失效时间:</label>
+                <input type="text" class="form-control" name="expiryDate" id="expiryDate" readonly />
+            </div>
+        </div>
+    </div>
+</form>
+<script th:inline="javascript">
+    <![CDATA[
+    $(function () {
+        //回显日期
+        setDateValue("jjTime",[[${entity.jjTime}]]);
+        setDateValue("teTime",[[${entity.teTime}]]);
+        setDateValue("expiryDate",[[${entity.expiryDate}]]);
+
+        //加载网点信息下拉框
+        loadBankInfoSelectOption("bankInfoId",[[${entity.bankInfoId}]]);
+        //加载日期选择框
+        loadDatetimepicker("jjTime");
+        loadDatetimepicker("teTime");
+        loadDatetimepicker("expiryDate");
+
+        //表单项校验
+        $('#fqtBaseInfoForm').bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                applyCode: {
+                    message: '申请编码验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '申请编码不能为空'
+                        } ,
+                        stringLength: {
+                            min: 2,
+                            max: 30,
+                            message: '申请编码长度必须在2到30之间'
+                        },
+                        threshold :  6 , //有6字符以上才发送ajax请求，（input中输入一个字符，插件会向服务器发送一次，设置限制，6字符以上才开始）
+                        remote: {//ajax验证。server result:{"valid",true or false} 向服务发送当前input name值，获得一个json数据。例表示正确：{"valid",true}
+                            url: "fqtBaseInfo/isExist",//验证地址
+                            data:function(validator) {// 获取需要传送到后台的验证的数据
+                                return {
+                                    applyCode:$('#applyCode').val()
+                                }
+                            },
+                            message: '申请编码已存在',//提示消息
+                            delay :  500,//每输入一个字符，就发ajax请求，服务器压力还是太大，设置2秒发送一次ajax（默认输入一个字符，提交一次，服务器压力太大）
+                            type: 'POST'//请求方式
+                        }
+                    }
+                },
+                salesman: {
+                    message: '营销员姓名验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '营销员姓名不能为空'
+                        },
+                        stringLength: {
+                            min: 2,
+                            max: 5,
+                            message: '营销员姓名长度必须在2到5之间'
+                        }
+                    }
+                },
+                customerName:{
+                    message: '客户姓名无效',
+                    validators: {
+                        stringLength: {
+                            min: 2,
+                            max: 5,
+                            message: '客户姓名长度必须在2到5之间'
+                        }
+                    }
+                },
+                identityCode:{
+                    message: '客户身份证号码无效',
+                    validators: {
+                        regexp: {
+                            regexp: /^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/,
+                            message: '身份证号码格式错误'
+                        }
+                    }
+                },
+                contactNumber : {
+                    message: '联系电话无效',
+                    validators: {
+                        regexp: {
+                            regexp: /^1[3456789]\d{9}$/,
+                            message: '联系电话格式错误'
+                        }
+                    }
+                },
+                fqqs:{
+                    message: '分期期数无效',
+                    validators: {
+                        regexp: {
+                            regexp: /^(0|[1-9][0-9]{1})$/,
+                            message: '分期期数格式错误'
+                        }
+                    }
+                },
+                fqRate:{
+                    message: '分期费率无效',
+                    validators: {
+                        regexp: {
+                            regexp: /^[0-9]+(.[0-9]{1,2})?$/,
+                            message: '分期费率格式错误'
+                        }
+                    }
+                },
+                fqMoney:{
+                    message: '分期金额无效',
+                    validators: {
+                        regexp: {
+                            regexp: /^[0-9]+(.[0-9]{1,2})?$/,
+                            message: '分期金额格式错误'
+                        }
+                    }
+                },
+                teMoney:{
+                    message: '调额金额无效',
+                    validators: {
+                        notEmpty: {
+                            message: '调额金额不能为空'
+                        },
+                        regexp: {
+                            regexp: /^[0-9]+(.[0-9]{1,2})?$/,
+                            message: '调额金额格式错误'
+                        }
+                    }
+                },
+                surplusMoney:{
+                    message: '剩余可用金额',
+                        validators: {
+                        notEmpty: {
+                            message: '剩余可用金额不能为空'
+                        },
+                        regexp: {
+                            regexp: /^[0-9]+(.[0-9]{1,2})?$/,
+                                message: '剩余可用金额格式错误'
+                        }
+                    }
+                },
+                cardNumber:{
+                    message: '卡号无效',
+                    validators: {
+                        regexp: {
+                            regexp: /^([1-9]{1})(\d{14}|\d{18})$/,
+                            message: '卡号格式错误'
+                        }
+                    }
+                }
+            }
+        })
+
+        // 绑定dialog的确定按钮的监听事件
+        $("#btnOk",window.top.document).click(function() {
+            // 此段是为防止需要点击两次按钮来实现验证的方法，若不添加此处的放行，那么我们将要点击两次确定按钮才可以提交验证
+            var applyCode = $("#applyCode").val();
+            // 判断当前的code又值，且当前不存在错误验证方可放开该字段的验证
+            if(applyCode != null && applyCode != ""&&$("#applyCode").parent("div").find('.glyphicon-remove').length==0){
+                $('#fqtBaseInfoForm').bootstrapValidator('enableFieldValidators', 'applyCode', false);
+            } else {
+                $('#fqtBaseInfoForm').bootstrapValidator('enableFieldValidators', 'applyCode', true);
+            }
+            var bootstrapValidator = $("#fqtBaseInfoForm", window.top.document).data('bootstrapValidator');
+            bootstrapValidator.validate();
+            if(bootstrapValidator.isValid()){
+                $.post($("#fqtBaseInfoForm",window.top.document).attr('action'),$("#fqtBaseInfoForm",window.top.document).serialize(),function(e){
+                    if(e.result){
+                        $('.modal-dialog', window.top.document).parent('div').remove()
+                        $('body', window.top.document).find('.modal-backdrop').remove();
+                        // jquery 调用刷新当前操作的table页面的refresh方法
+                        $(window.parent.document).contents().find(".tab-pane.fade.active.in iframe")[0].contentWindow.doQuery();
+                        window.Ewin.alert({message:e.msg});
+                    }else{
+                        window.Ewin.alert({message:e.msg});
+                    }
+                })
+            }else{
+                return false;
+            }
+        });
+
+    })
+    ]]>
+</script>
+</body>
+</html>

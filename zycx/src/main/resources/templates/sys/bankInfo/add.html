@@ -1,0 +1,244 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+
+    <style type="text/css">
+        .select2-drop {
+            z-index: 10050 !important;
+        }
+
+        .select2-search-choice-close {
+            margin-top: 0 !important;
+            right: 2px !important;
+            min-height: 10px;
+        }
+
+        .select2-search-choice-close:before {
+            color: black !important;
+        }
+        /*防止select2不会自动失去焦点*/
+        .select2-container {
+            z-index: 16000 !important;
+        }
+
+        .select2-drop-mask {
+            z-index: 15990 !important;
+        }
+
+        .select2-drop-active {
+            z-index: 15995 !important;
+        }
+        .select2-hidden-accessible {
+            border: 0 !important;
+            clip: rect(0 0 0 0) !important;
+            height: 1px !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            padding: 0 !important;
+            position: absolute !important;
+            width: 1px !important;
+        }
+        .select2-container {
+            box-sizing: border-box;
+            display: inline-block;
+            margin: 0;
+            position: relative;
+            vertical-align: middle;
+        }
+        .select2-container .select2-selection--single {
+            display: block;
+            width: 100%;
+            height: 34px;
+            padding: 3px 5px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+            background-color: #fff;
+            background-image: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+            -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+            -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+            transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+        }
+        .select2-container .select2-selection--single {
+            box-sizing: border-box;
+            cursor: pointer;
+            display: block;
+            height: 28px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #444;
+            line-height: 28px;
+        }
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            display: block;
+            padding-left: 8px;
+            padding-right: 20px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #999;
+        }
+        * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #444;
+            line-height: 28px;
+        }
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            display: block;
+            padding-left: 8px;
+            padding-right: 20px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+<form id="bankInfoForm"  role="form" method="post" action="bankInfo/save">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group" >
+                <label for="bankName"><span style="color:red;">*</span>网点名称:</label>
+                <input type="text" class="form-control" name="bankName" id="bankName"  placeholder="请输入网点名称" />
+            </div>
+            <div class="form-group">
+                <label for="bankCode"><span style="color:red;">*</span>网点代码:</label>
+                <input type="text" class="form-control" name="bankCode" id="bankCode"  placeholder="请输入网点代码" />
+            </div>
+            <div class="form-group" >
+                <label for="contacts"><span style="color:red;">*</span>联系人:</label>
+                <input type="text" class="form-control" name="contacts" id="contacts"  placeholder="请输入联系人" />
+            </div>
+            <div class="form-group" >
+                <label for="phoneCode"><span style="color:red;">*</span>手机号码:</label>
+                <input type="text" class="form-control" name="phoneCode" id="phoneCode"  placeholder="请输入手机号码" />
+            </div>
+            <div class="form-group" style="margin-top: 10px;">
+                <label for="parentId">所属管辖支行:</label>
+                <select name="parentId" id="parentId"  class="form-control"></select>
+            </div>
+        </div>
+        <div class="col-md-3" style="margin-top: 10px;display: none;">
+            <ul id="groupZtree" class="ztree" style="width:200px; overflow:auto;"></ul>
+        </div>
+    </div>
+</form>
+<script th:inline="javascript">
+    <![CDATA[
+    $(function () {
+        /*$("#parentId").select2({
+            width:200,
+            placeholder: "请选择所属管辖支行名称",
+            allowClear: true
+        });
+*/
+        loadDictIntoToSelectOption("parentId","BANK_INFO");
+        $.fn.modal.Constructor.prototype.enforceFocus = function () {};
+        $('#bankInfoForm').bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                bankName: {
+                    message: '网点名称验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '网点名称不能为空'
+                        } ,
+                        stringLength: {
+                            min: 2,
+                            max: 30,
+                            message: '名字长度必须在2到30之间'
+                        }
+                    }
+                },
+                bankCode: {
+                    message: '网点代码验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '网点代码不能为空'
+                        },
+                        stringLength: {
+                            min: 6,
+                            max: 30,
+                            message: '网点代码长度必须在6到30之间'
+                        }
+                    }
+                },
+                contacts: {
+                    message:'联系人无效',
+                    validators: {
+                        notEmpty: {
+                            message: '联系人不能为空'
+                        },
+                        stringLength: {
+                            min: 2,
+                            max: 30,
+                            message: '类目长度必须在6到30之间'
+                        }
+                    }
+                },
+                phoneCode: {
+                    message:'手机号码无效',
+                    validators: {
+                        notEmpty: {
+                            message: '手机号码不能为空'
+                        },
+                        regexp: {//匹配规则
+                            regexp: /^1(3[0-9]|5[189]|8[6789])[0-9]{8}$/,
+                            message: '手机号码格式错误'
+                        }
+                    }
+                }
+            }
+        })
+
+        // 绑定dialog的确定按钮的监听事件
+        $("#btnOk",window.top.document).click(function() {
+            // 此段是为防止需要点击两次按钮来实现验证的方法，若不添加此处的放行，那么我们将要点击两次确定按钮才可以提交验证
+            var bankName = $("#bankName").val();
+            // 判断当前的code有值，且当前不存在错误验证方可放开该字段的验证
+            if(bankName != null && bankName != ""&&$("#bankName").parent("div").find('.glyphicon-remove').length==0){
+                $('#bankInfoForm').bootstrapValidator('enableFieldValidators', 'bankName', false);
+            } else {
+                $('#bankInfoForm').bootstrapValidator('enableFieldValidators', 'bankName', true);
+            }
+            var bootstrapValidator = $("#bankInfoForm", window.top.document).data('bootstrapValidator');
+            bootstrapValidator.validate();
+            if(bootstrapValidator.isValid()){
+                $.post($("#bankInfoForm",window.top.document).attr('action'),$("#bankInfoForm",window.top.document).serialize(),function(e){
+                    if(e.result){
+                        $('.modal-dialog', window.top.document).parent('div').remove()
+                        $('body', window.top.document).find('.modal-backdrop').remove();
+                        // jquery 调用刷新当前操作的table页面的refresh方法
+                        $(window.parent.document).contents().find(".tab-pane.fade.active.in iframe")[0].contentWindow.doQuery();
+                        window.Ewin.alert({message:'增加数据成功!'});
+                    }else{
+                        window.Ewin.alert({message:'增加数据失败!'});
+                    }
+                })
+            }else{
+                return false;
+            }
+        })
+
+    })
+    ]]>
+</script>
+</body>
+</html>

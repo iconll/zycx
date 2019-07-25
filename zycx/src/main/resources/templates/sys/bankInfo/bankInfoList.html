@@ -1,0 +1,183 @@
+<html xmlns:th="http://www.thymeleaf.org"
+>
+<head th:include="include/includebase"></head>
+<style type="text/css">
+    .select2-container .select2-selection--single{
+        display: block;
+        width: 100%;
+        height: 34px;
+        padding: 3px 5px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+        box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+        -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+        -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+        transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    }
+</style>
+<body>
+<div class="panel-body" style="padding-bottom:0px;">
+        <div class="panel panel-default" style="margin-top: 10px;">
+            <div class="panel-heading">查询条件</div>
+            <div class="panel-body">
+                <form class="form-inline" role="form" style="float: left; width: 100%;margin-left: 20px;" method="post" id="queryBankInfo">
+                    <div class="form-group">
+                        <label for="bankName">网点名字:</label>
+                        <input type="text" class="form-control" name="bankName" id="bankName"  placeholder="请输入网点名称" />
+                    </div>
+                    <div class="form-group">
+                        <label for="bankCode">网点编码:</label>
+                        <input type="text" class="form-control" name="bankCode" id="bankCode"  placeholder="请输入网点编码" />
+                    </div>
+                    <div class="form-group">
+                        <label for="parentId">所属管辖支行:</label>
+                        <select name="parentId" id="parentId" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" id="queryBtn" onclick="doQuery();" class="btn btn-primary">查询</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <table id="bankInfo-table" style="margin-top: -50px;">
+        </table>
+</div>
+<script th:inline="javascript">
+    $(function() {
+        /*$("#parentId").select2({
+            width:200,
+            placeholder: "请选择所属管辖支行名称",
+            allowClear: true
+        });*/
+        loadDictIntoToSelectOption("parentId","BANK_INFO");//加载所属支行下拉框
+        initTable();
+
+        //处理表头和内容对不齐
+        $(window).resize(function(){
+            clTable();
+        });
+    });
+
+    function doQuery(){
+        $('#bankInfo-table').bootstrapTable('refresh');    //刷新表格
+    }
+
+    function initTable(){
+        $('#bankInfo-table').bootstrapTable({
+            url:"/bankInfo/list",
+            height: $(window.parent.document).find("#wrapper").height() - 252,
+            width:$(window).width(),
+            showColumns:true,
+            formId:'queryBankInfo',
+            pagination : true,
+            sortName : 'id',
+            sortOrder : 'desc',
+            sortable :false,
+            clickToSelect: true,// 单击某一行的时候选中某一条记录
+            pageList: [10, 25, 50, 100], //可供选择的每页的行数（*）
+            pageSize : 10,
+            toolbars:[
+                {
+                    text: '添加',
+                    iconCls: 'glyphicon glyphicon-plus',
+                    handler: function () {
+                        window.Ewin.dialog({title:"添加",
+                            url:"bankInfo/addPage",
+                            gridId:"gridId",
+                            width:600,
+                            height:545
+                        })
+                    }
+                },
+                {
+                    text: '修改',
+                    iconCls: 'glyphicon glyphicon-pencil',
+                    handler: function () {
+                        var rows = $('#bankInfo-table').bootstrapTable('getSelections');
+                        if(rows.length==0||rows.length>1){
+                            window.Ewin.alert({message:'请选择一条需要修改的数据!'});
+                            return false;
+                        }
+                        window.Ewin.dialog({title:"修改",url:"bankInfo/updatePage?id="+rows[0].id,width:600,height:595});
+                    }
+                },
+                {
+                    text: '删除',
+                    iconCls: 'glyphicon glyphicon-remove',
+                    handler: function () {
+                        var rows = $('#bankInfo-table').bootstrapTable('getSelections');
+                        if(rows.length==0){
+                            window.Ewin.alert({message:'请选择一条需要删除的数据!'});
+                            return false;
+                        }
+                        window.Ewin.confirm({title:'提示',message:'是否要删除您当前所勾选的网点信息？',width:500}).on(function (e) {
+                            if (e) {
+                                $.post("bankInfo/removeBath",{json:JSON.stringify(rows)},function(e){
+                                    if(e.result){
+                                        window.Ewin.alert({message:e.msg});
+                                        doQuery();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            ],
+            columns: [
+                {
+                    checkbox: true
+                },
+                {
+                    field: '',
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index+1;
+                    }
+                },
+                {
+                    field : 'bankName',
+                    title : '网点名称',
+                    align : 'center',
+                    valign : 'middle',
+                    hide : false
+                },
+                {
+                    field : 'bankCode',
+                    title : '网点代码',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'contacts',
+                    title : '联系人',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'phoneCode',
+                    title : '手机号码',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'parentId',
+                    title : '所属管辖支行',
+                    align : 'center',
+                    valign : 'middle'
+                }],
+            onPostHeader:function(){
+                clTable();
+            }
+        });
+    }
+
+
+</script>
+</body>
+</html>

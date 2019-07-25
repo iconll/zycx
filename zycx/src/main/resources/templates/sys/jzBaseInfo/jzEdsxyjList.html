@@ -1,0 +1,263 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="include/includebase"></head>
+
+<!--家装分期额度有效预警-->
+<body>
+<div class="panel-body" style="padding-bottom:0px;">
+        <div class="panel panel-default" style="margin-top: 10px;">
+            <div class="panel-heading">
+                查询条件
+            </div>
+            <div class="panel-body">
+                <form class="form-inline" role="form" style="float: left; width: 100%;margin-left: 20px;" method="post" id="queryJzBaseInfo">
+                    <div class="form-group">
+                        <label for="validDays">额度剩余有效天数:</label>
+                        <input type="text" class="form-control" name="validDays" id="validDays" th:value="20"  placeholder="请输入额度剩余有效天数" />
+                    </div>
+                    <div class="form-group">
+                        <button type="button" id="queryBtn" onclick="doQuery();" class="btn btn-primary">查询</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <table id="jzBaseInfo-table" style="margin-top: -50px;">
+        </table>
+</div>
+<script th:inline="javascript">
+    $(function() {
+        initTable();
+        //处理表头和内容对不齐
+        $(window).resize(function(){
+            clTable();
+        });
+    });
+    function doQuery(){
+        $('#jzBaseInfo-table').bootstrapTable('refresh');    //刷新表格
+    }
+
+    function initTable(){
+        $('#jzBaseInfo-table').bootstrapTable('destroy');
+        var fqtTable = $('#jzBaseInfo-table').bootstrapTable({
+            url:"/jzBaseInfo/list",
+            height: $(window.parent.document).find("#wrapper").height(),
+            width:$(window).width(),
+            showColumns:true,
+            formId :"queryJzBaseInfo",
+            pagination : true,
+            sortName : 'id',
+            sortOrder : 'desc',
+            clickToSelect: true,// 单击某一行的时候选中某一条记录
+            pageSize : 10,
+            toolbars:[
+                {
+                    text: '导出Excel',
+                    iconCls: 'glyphicon glyphicon-share',
+                    handler: function () {
+                        window.location.href = "/excelManage/exportJzExcel?key=jz_edyxqyj&validDays=" + $("#validDays").val();
+                    }
+                }
+            ],
+            columns: [
+                {
+                    field: '',
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index+1;
+                    }
+                },
+                {
+                    field : 'applyCode',
+                    title : '申请编码',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'employeeName',
+                    title : '营销员',
+                    align : 'center',
+                    valign : 'middle',
+                    sortable:true,
+                    sortName:"employee_name"
+                },
+                {
+                    field : 'employeeId',
+                    title : '营销员编号',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'bankName',
+                    title : '网点名称',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'parentBankName',
+                    title : '所属管辖支行',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'jjTime',
+                    title : '进件时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'jjType',
+                    title : '进件类型',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'customerName',
+                    title : '客户姓名',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'identityCode',
+                    title : '客户身份证号码',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'contactNumber',
+                    title : '联系电话',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'workCompany',
+                    title : '工作单位',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'houseType',
+                    title : '房屋性质',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'jzFqQs',
+                    title : '分期期数',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'jzFqRate',
+                    title : '费率(%)',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'jzFqMoney',
+                    title : '分期金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'jzSpMoney',
+                    title : '审批金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'passDate',
+                    title : '通过时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'passDate',
+                    title : '通过时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'firstTeMoney',
+                    title : '一次调额金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'firstTeTime',
+                    title : '一次调额时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'firstZyFlag',
+                    title : '一次支用标识',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'secondTeMoney',
+                    title : '二次调额金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'secondTeTime',
+                    title : '二次调额时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'secondZyFlag',
+                    title : '二次支用标识',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'tezsMoney',
+                    title : '调额中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'surplusMoney',
+                    title : '剩余可用额度',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'syzsMoney',
+                    title : '剩余中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'disburseMoney',
+                    title : '支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'disburseZSMoney',
+                    title : '支用中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'cardNumber',
+                    title : '卡号',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'edEndTime',
+                    title : '额度失效时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'validDays',
+                    title : '额度剩余有效天数',
+                    align : 'center',
+                    valign : 'middle',
+                    formatter: function (value, row, index) {
+                        if(value != null){
+                            var num = new Number(value);
+                            if(num <= 0){
+
+                                return "<span style='color:red;'>已失效</span>";
+                            }else{
+
+                                return "<span style='color:red;'>"+value+"</span>";
+                            }
+                        }else {
+                            return "-";
+                        }
+                    }
+                }],
+            onPostHeader:function(){
+                clTable();
+            }
+        });
+    }
+
+
+</script>
+</body>
+</html>

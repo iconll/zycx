@@ -1,0 +1,221 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:include="include/includebase"></head>
+<body>
+<div>
+        <div id="oneDiv" class="row" style="display: none;">
+                <div class="col-md-12" style="padding-bottom: 10px;">
+                        <h6 class="th6">分期通额度有效期预警（<span id="fqtDays"></span>天）</h6>
+                        <table id="fqtBaseInfo-table" style="margin-top: -50px;">
+                        </table>
+                </div>
+        </div>
+        <div style="margin-top:10px;display: none;" id="twoDiv" class="row">
+                <div class="col-md-12" style="padding-bottom: 10px;">
+                        <h6 class="th6">家装分期额度有效期预警（<span id="jzDays"></span>天）</h6>
+                        <table id="jzBaseInfo-table" style="margin-top: -50px;">
+                        </table>
+                </div>
+        </div>
+</div>
+
+<script th:inline="javascript">
+    $(function () {
+        //根据用户菜单加载对应的首页预警项
+        $.get('/user/findCurrentLoginUserTreeCodeList',function(e){
+            if(e != null && e.length > 0){
+                $.each(e,function(index,item){
+
+                    if(item == 'FQTGL'){
+                        initFqtBotTable();
+                        $("#oneDiv").show();
+                    }else if(item == 'JZFQGL'){
+                        initJzBotTable();
+                        $("#twoDiv").show();
+                    }
+                });
+            }
+        });
+    })
+
+    function initFqtBotTable(){
+        //加载数据字典中的属性值
+        var value = getDictValue("HOME_FQT_YJ","HOME_FQT_YJ");
+        $("#fqtDays").html(value);
+        $('#fqtBaseInfo-table').bootstrapTable('destroy');
+        var fqtTable = $('#fqtBaseInfo-table').bootstrapTable({
+            url:"/fqtBaseInfo/loadHomeFqtYjData?validDays=" + value,
+            height: $(window.parent.document).find("#wrapper").height() * 0.5,
+            width:$(window).width(),
+            showColumns: false,
+            showRefresh: false,
+            showToggle: false,
+            formId :"queryFqtBaseInfo",
+            pagination : false,
+            sortName : 'id',
+            sortOrder : 'desc',
+            showPaginationSwitch:false,
+            columns: [
+                {
+                    field: '',
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index+1;
+                    }
+                },
+                {
+                    field : 'applyCode',
+                    title : '申请编码',
+                    align : 'center',
+                    valign : 'middle',
+                    hide : false
+                },
+                {
+                    field : 'salesman',
+                    title : '营销员',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'customerName',
+                    title : '客户姓名',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'teTime',
+                    title : '调额时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'teMoney',
+                    title : '调额金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'disburseMoney',
+                    title : '支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'surplusMoney',
+                    title : '剩余可用额度',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'expiryDate',
+                    title : '额度失效时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'validDays',
+                    title : '额度剩余有效天数',
+                    align : 'center',
+                    valign : 'middle',
+                    formatter: function (value, row, index) {
+                        if(value != null){
+                            return "<span style='color:red;'>"+value+"</span>";
+                        }else {
+                            return "-";
+                        }
+                    }
+                }],
+            onPostHeader:function(){
+                clTable();
+            }
+        });
+    }
+    function initJzBotTable(){
+        //加载数据字典中的属性值
+        var value = getDictValue("HOME_JZFQ_YJ","HOME_JZFQ_YJ");
+        $("#jzDays").html(value);
+        $('#jzBaseInfo-table').bootstrapTable('destroy');
+        var jzTable = $('#jzBaseInfo-table').bootstrapTable({
+            url:"/jzBaseInfo/loadHomeJzYjData?validDays=" + value,
+            height: $(window.parent.document).find("#wrapper").height() * 0.5,
+            width:$(window).width(),
+            showColumns: false,
+            showRefresh: false,
+            showToggle: false,
+            formId :"queryFqtBaseInfo",
+            pagination : false,
+            sortName : 'id',
+            sortOrder : 'desc',
+            showPaginationSwitch:false,
+            columns: [
+                {
+                    field: '',
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index+1;
+                    }
+                },
+                {
+                    field : 'applyCode',
+                    title : '申请编码',
+                    align : 'center',
+                    valign : 'middle',
+                    hide : false
+                },
+                {
+                    field : 'employeeName',
+                    title : '营销员',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'employeeId',
+                    title : '营销员编号',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'customerName',
+                    title : '客户姓名',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'passDate',
+                    title : '通过时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'jzSpMoney',
+                    title : '审批金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'disburseMoney',
+                    title : '支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'surplusMoney',
+                    title : '剩余可用额度',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'edEndTime',
+                    title : '失效时间',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'validDays',
+                    title : '剩余有效天数',
+                    align : 'center',
+                    valign : 'middle',
+                    formatter: function (value, row, index) {
+                        if(value != null){
+                            return "<span style='color:red;'>"+value+"</span>";
+                        }else {
+                            return "-";
+                        }
+                    }
+                }],
+            onPostHeader:function(){
+                clTable();
+            }
+        });
+
+    }
+</script>
+</body>
+</html>
