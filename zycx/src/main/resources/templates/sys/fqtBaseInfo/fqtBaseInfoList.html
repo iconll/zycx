@@ -1,7 +1,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:include="include/includebase"></head>
 <style type="text/css">
-
     .select2-container .select2-selection--single{
         display: block;
         width: 100%;
@@ -23,10 +22,15 @@
     .form-group{
         margin-bottom: 10px !important;
     }
-
     .dropdown-menu li{
         border-bottom: solid 1px #e5e5e5;
         padding: 1px;
+    }
+    .activeBefore{
+        color:#337ab7;
+    }
+    .active{
+        color:#333;
     }
 </style>
 <!--分期通基础数据管理-->
@@ -34,7 +38,17 @@
 <div class="panel-body" style="padding-bottom:0px;">
         <div class="panel panel-default" style="margin-top: 10px;">
             <div class="panel-heading">
-                数据导入
+                <span class="tabSpan activeBefore" style="margin-right: 10px;">
+                    <i class="fa fa-fw fa-upload"></i>
+                    数据导入
+                    <i class="fa fa-angle-down"></i>
+                </span>
+                <span>|</span>
+                <span class="tabSpan activeBefore" style="margin-left: 10px;">
+                    <i class="fa fa-fw fa-search"></i>
+                    查询条件
+                    <i class="fa fa-angle-down"></i>
+                </span>
                 <ul class="nav navbar-right top-nav" style="margin-top:-10px;">
                     <li>
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -51,28 +65,36 @@
                             <li>
                                 <a href="/excel-templates/template-fqtKyed.xls">可用额度数据导入模板</a>
                             </li>
+                            <li>
+                                <a href="/excel-templates/template-fqtHfzy.xls">行方支用数据导入模板</a>
+                            </li>
                         </ul>
                     </li>
                 </ul>
             </div>
-            <div class="panel-body row">
-                <div class="col-md-4">
-                    <label for="baseDataImport">基础数据导入:</label>
-                    <input id="baseDataImport" type="file" class="file-loading form-control" data-preview-file-type="text" name="baseDataImport" class="input-xlarge">
+            <div class="panel-body tabDiv" style="display: none;" id="importDiv">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="baseDataImport">基础数据导入:</label>
+                        <input id="baseDataImport" type="file" class="file-loading form-control" data-preview-file-type="text" name="baseDataImport" class="input-xlarge">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="khDataImport">卡号数据导入:</label>
+                        <input id="khDataImport" type="file" class="file-loading form-control" data-preview-file-type="text" name="khDataImport" class="input-xlarge">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="kyedDataImport">剩余可用额度数据导入:</label>
+                        <input id="kyedDataImport" type="file" class="file-loading form-control" data-preview-file-type="text" name="kyedDataImport" class="input-xlarge"   >
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <label for="khDataImport">卡号数据导入:</label>
-                    <input id="khDataImport" type="file" class="file-loading form-control" data-preview-file-type="text" name="khDataImport" class="input-xlarge">
-                </div>
-                <div class="col-md-4">
-                    <label for="kyedDataImport">可用额度数据导入:</label>
-                    <input id="kyedDataImport" type="file" class="file-loading form-control" data-preview-file-type="text" name="kyedDataImport" class="input-xlarge"   >
+                <div class="row" style="margin-top: 10px;">
+                    <div class="col-md-4">
+                        <label for="hfzyDataImport">行方支用数据导入:</label>
+                        <input id="hfzyDataImport" type="file" class="file-loading form-control" data-preview-file-type="text" name="hfzyDataImport" class="input-xlarge"   >
+                    </div>
                 </div>
             </div>
-            <div class="panel-heading">
-                查询条件
-            </div>
-            <div class="panel-body">
+            <div class="panel-body tabDiv" style="display: none;" id = "queryDiv">
                 <form class="form-inline" role="form" style="float: left; width: 100%;margin-left: 20px;margin-bottom: -20px;" method="post" id="queryFqtBaseInfo">
                         <div class="form-group">
                             <label for="salesman">营销员姓名:</label>
@@ -91,13 +113,18 @@
                             <select name = "bankInfoId" id = "bankInfoId" class="select2_group form-control"></select>
                         </div>
                         <div class="form-group">
-                            <label for="jjStartTime">进件开始时间:</label>
+                            <label for="parentId">所属管辖支行:</label>
+                            <select name="parentId" id="parentId" class="form-control"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="jjStartTime">进件时间:</label>
                             <input type="text" class="form-control" name="jjStartTime" id="jjStartTime"  placeholder="请选择进件开始时间" readonly />
                             ~
                             <input type="text" class="form-control" name="jjEndTime" id="jjEndTime"  placeholder="请选择进件结束时间" readonly/>
                         </div>
                         <div class="form-group">
                             <button type="button" id="queryBtn" onclick="doQuery();" class="btn btn-primary">查询</button>
+                            <button type="button" class="btn btn-primary" onclick="resetForm('queryFqtBaseInfo','bankInfoId')">重置查询条件</button>
                         </div>
                 </form>
             </div>
@@ -107,10 +134,14 @@
 </div>
 <script th:inline="javascript">
     $(function() {
+        //鼠标移到对应的按钮显示对应的区域内容
+        addTopStyle("fqtBaseInfo-table");
         //加载进件开始时间和结束时间选择框
-        loadStartAndEndDatetimepicker("jjStartTime","jjEndTime");
+        loadStartAndEndDatetimepicker("jjStartTime","jjEndTime",true);
         //初始化数据表格
         initTable();
+        //加载所属支行下拉框
+        loadDictIntoToSelectOption("parentId","BANK_INFO");
 
         //处理表头和内容对不齐
         $(window).resize(function(){
@@ -122,6 +153,8 @@
         showUploadExcel("khDataImport","/excelManage/importFqtKHData","fqt_kh_data");
         //分期通可用额度数据上传
         showUploadExcel("kyedDataImport","/excelManage/importFqtKYEDData","fqt_kyed_data");
+        //分期通行方支用金额数据上传
+        showUploadExcel("hfzyDataImport","/excelManage/importFqtHFZYData","fqt_hfzy_data");
 
         $("#bankInfoId").select2({
             width:200,
@@ -136,9 +169,6 @@
      * @param content
      */
     function showLayerWindow(content){
-        /*var pWidth = $(".panel-body").width() * 0.3;
-        var pHeight = $(".panel-body").height() * 0.25;*/
-
         var _scrollHeight = $(document).scrollTop(),//获取当前窗口距离页面顶部高度
             _windowHeight = $(window).height(),//获取当前窗口高度
             _windowWidth = $(window).width(),//获取当前窗口宽度
@@ -208,11 +238,17 @@
             //处理上传文件类型限制
             $.each(event.currentTarget.files,function(index,item){
 
-                if(item.type != 'application/vnd.ms-excel' || item.size > 10240000){
+                if((item.type == '' || item.type == 'application/vnd.ms-excel') && item.size < 10240000){
+
+                    $(event.target).parent().siblings('.fileinput-upload').show();
+                }else{
+                    $(event.target).parent().siblings('.fileinput-upload').hide();
+                }
+                /*if(item.type != '' || item.type != 'application/vnd.ms-excel' || item.size > 10240000){
                     $(event.target).parent().siblings('.fileinput-upload').hide();
                 }else{
                     $(event.target).parent().siblings('.fileinput-upload').show();
-                }
+                }*/
             });
         });
     }
@@ -235,6 +271,13 @@
             pageSize : 10,
             toolbars:[
                 {
+                    text: '导出',
+                    iconCls: 'glyphicon glyphicon-share',
+                    handler: function () {
+                        var param = $("#queryFqtBaseInfo").serialize();
+                        window.location.href = "/excelManage/exportExcel?key=fqt_baseData&" + param;
+                    }
+                },{
                     text: '修改',
                     iconCls: 'glyphicon glyphicon-pencil',
                     handler: function () {
@@ -375,6 +418,16 @@
                 },{
                     field : 'disburseZSMoney',
                     title : '支用中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'bankZyMoney',
+                    title : '行方支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'bankZyZSMoney',
+                    title : '行方支用中收',
                     align : 'center',
                     valign : 'middle'
                 },{

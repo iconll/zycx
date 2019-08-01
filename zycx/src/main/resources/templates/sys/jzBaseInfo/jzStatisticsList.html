@@ -16,11 +16,25 @@
                             <option value="yg">员工</option>
                             <option value="wd">网点</option>
                         </select>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     </div>
                     <div class="form-group">
-                        <label for="passMonth">审批通过时间:</label>
-                        <input type="text" class="form-control" name="passMonth" id="passMonth" readonly/>
+                        <label for="passStartTime">审批通过时间:</label>
+                        <input type="text" class="form-control" name="passStartTime" id="passStartTime" readonly/>
+                        ~
+                        <input type="text" class="form-control" name="passEndTime" id="passEndTime" readonly/>
+                    </div>
+                    <div class="form-group" id="employeeDiv">
+                        <label for="employeeName">营销员:</label>
+                        <input type="text" class="form-control" name="employeeName" id="employeeName"/>
+                    </div>
+                    <div class="form-group" style="display: none;" id="bankDiv">
+                        <label for="bankName">网点名称:</label>
+                        <input type="text" class="form-control" name="bankName" id="bankName"/>
+                    </div>
+                    <div class="form-group" id="parentDiv" style="display: none;">
+                        <label for="parentBankName">支行名称:</label>
+                        <input type="text" class="form-control" name="parentBankName" id="parentBankName"/>
                     </div>
                     <div class="form-group">
                         <button type="button" id="queryBtn" onclick="doQuery();" class="btn btn-primary">查询</button>
@@ -33,16 +47,12 @@
 </div>
 <script th:inline="javascript">
     $(function() {
-        $("#passMonth").datetimepicker({
-            format: "yyyy-mm",
-            weekStart: 1,
-            autoclose: true,
-            startView: 3,
-            minView: 3,
-            forceParse: false,
-            language: 'zh-CN'
-        });
-        $("#passMonth").datetimepicker("setDate", new Date());
+        //初始化审批通过时间
+        loadStartAndEndDatetimepicker("passStartTime","passEndTime",false);
+        //开始时间默认为本月第一天
+        $("#passStartTime").datetimepicker("setDate", getCurrentMonthFirst());
+        //结束时间默认为当前时间
+        $("#passEndTime").datetimepicker("setDate", new Date());
         initYGTable();
         //处理表头和内容对不齐
         $(window).resize(function(){
@@ -63,8 +73,14 @@
         }else{
             //如果类型发生改变就展示对应的table
             if(reportType == 'yg'){//员工
+                $("#employeeDiv").show();
+                $("#bankDiv").hide();
+                $("#parentDiv").hide();
                 initYGTable();
             }else if(reportType == 'wd'){//网点
+                $("#employeeDiv").hide();
+                $("#bankDiv").show();
+                $("#parentDiv").show();
                 initWDTable();
             }
 
@@ -90,7 +106,8 @@
                     text: '导出Excel',
                     iconCls: 'glyphicon glyphicon-share',
                     handler: function () {
-                        window.location.href = "/excelManage/exportJzExcel?key=jz_ygReportExport&passMonth=" + $("#passMonth").val() + "&zyMonth" + $("#zyMonth").val();
+                        var param = $("#queryJzBaseInfo").serialize();
+                        window.location.href = "/excelManage/exportJzExcel?key=jz_ygReportExport&" + param;
                     }
                 }
             ],
@@ -103,12 +120,12 @@
                     }
                 },{
                     field : 'employeeId',
-                    title : '营销员',
+                    title : '营销员编号',
                     align : 'center',
                     valign : 'middle'
                 },{
                     field : 'employeeName',
-                    title : '营销员编号',
+                    title : '营销员',
                     align : 'center',
                     valign : 'middle'
                 },{
@@ -129,6 +146,16 @@
                 },{
                     field : 'dyzyzsMoney',
                     title : '当月支用中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'bankZyMoney',
+                    title : '行方支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'bankZyZSMoney',
+                    title : '行方支用中收',
                     align : 'center',
                     valign : 'middle'
                 },{
@@ -178,10 +205,11 @@
             pageSize : 10,
             toolbars:[
                 {
-                    text: '导出',
+                    text: '导出Excel',
                     iconCls: 'glyphicon glyphicon-share',
                     handler: function () {
-                        window.location.href = "/excelManage/exportJzExcel?key=jz_wdReportExport&passMonth=" + $("#passMonth").val() + "&zyMonth" + $("#zyMonth").val();
+                        var param = $("#queryJzBaseInfo").serialize();
+                        window.location.href = "/excelManage/exportJzExcel?key=jz_wdReportExport&" + param;
                     }
                 }
             ],
@@ -220,6 +248,16 @@
                 },{
                     field : 'dyzyzsMoney',
                     title : '当月支用中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'bankZyMoney',
+                    title : '行方支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'bankZyZSMoney',
+                    title : '行方支用中收',
                     align : 'center',
                     valign : 'middle'
                 },{

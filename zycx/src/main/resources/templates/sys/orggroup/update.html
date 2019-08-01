@@ -48,14 +48,14 @@
                         }
                     }
                 },
-                value: {
+                num: {
                     message: '部门编制验证失败',
                     validators: {
                         notEmpty: {
                             message: '部门编制不能为空'
                         },
                         regexp: {
-                            regexp: /^\d{1,9}$ /,
+                            regexp: /^[0-9_]+$/,
                             message: '部门编制必须为数字'
                         },
                         stringLength: {

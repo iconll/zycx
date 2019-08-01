@@ -49,7 +49,7 @@
             pageSize : 10,
             toolbars:[
                 {
-                    text: '导出',
+                    text: '导出Excel',
                     iconCls: 'glyphicon glyphicon-share',
                     handler: function () {
                         window.location.href = "/excelManage/exportExcel?key=fqt_edyxqyj&validDays=" + $("#validDays").val();
@@ -160,6 +160,16 @@
                 },{
                     field : 'disburseZSMoney',
                     title : '支用中收',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'bankZyMoney',
+                    title : '行方支用金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'bankZyZSMoney',
+                    title : '行方支用中收',
                     align : 'center',
                     valign : 'middle'
                 },{

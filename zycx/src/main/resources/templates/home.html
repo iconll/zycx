@@ -47,14 +47,15 @@
             url:"/fqtBaseInfo/loadHomeFqtYjData?validDays=" + value,
             height: $(window.parent.document).find("#wrapper").height() * 0.5,
             width:$(window).width(),
+            pagination : true,
             showColumns: false,
             showRefresh: false,
             showToggle: false,
             formId :"queryFqtBaseInfo",
-            pagination : false,
             sortName : 'id',
             sortOrder : 'desc',
             showPaginationSwitch:false,
+            pageSize : 10,
             columns: [
                 {
                     field: '',
@@ -137,10 +138,11 @@
             showRefresh: false,
             showToggle: false,
             formId :"queryFqtBaseInfo",
-            pagination : false,
+            pagination : true,
             sortName : 'id',
             sortOrder : 'desc',
             showPaginationSwitch:false,
+            pageSize : 10,
             columns: [
                 {
                     field: '',
@@ -178,8 +180,13 @@
                     align : 'center',
                     valign : 'middle'
                 },{
-                    field : 'jzSpMoney',
-                    title : '审批金额',
+                    field : 'firstTeMoney',
+                    title : '一次调额金额',
+                    align : 'center',
+                    valign : 'middle'
+                },{
+                    field : 'secondTeMoney',
+                    title : '二次调额金额',
                     align : 'center',
                     valign : 'middle'
                 },{

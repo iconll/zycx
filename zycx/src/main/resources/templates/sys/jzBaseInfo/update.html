@@ -2,129 +2,227 @@
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
 <body>
 <form id="jzBaseInfoForm"  role="form" method="post" action="jzBaseInfo/update">
+    <input type="hidden" name="id"  th:value="${entity.id}" />
+    <input type="hidden" name="operater"  th:value="${entity.operater}" />
+    <input type="hidden" name="importTime" id="importTime" />
     <div class="row">
-        <div class="col-md-12">
-            <input type="hidden" name="id"  th:value="${entity.id}" />
-            <input type="hidden" name="operater"  th:value="${entity.operater}" />
+        <div class="col-md-6">
             <div class="form-group" >
                 <label for="applyCode"><span style="color:red;">*</span>申请编码:</label>
                 <input type="text" class="form-control" name="applyCode" id="applyCode" th:value="${entity.applyCode}"  placeholder="请输入申请编码" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="employeeName"><span style="color:red;">*</span>营销员姓名:</label>
                 <input type="text" class="form-control" name="employeeName" id="employeeName" th:value="${entity.employeeName}" placeholder="请输入营销员姓名" />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="employeeId"><span style="color:red;">*</span>营销员编号:</label>
                 <input type="text" class="form-control" name="employeeId" id="employeeId" th:value="${entity.employeeId}" placeholder="请输入营销员编号" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="bankInfoId"><span style="color:red;">*</span>网点名称:</label>
                 <select name = "bankInfoId" id = "bankInfoId" class="form-control"></select>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="jjTime">进件时间:</label>
                 <input type="text" class="form-control" name="jjTime" id="jjTime" readonly />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="jjType">进件类型:</label>
                 <input type="text" class="form-control" name="jjType" id="jjType" th:value="${entity.jjType}" placeholder="请输入进件类型" />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="customerName">客户姓名:</label>
                 <input type="text" class="form-control" name="customerName" id="customerName" th:value="${entity.customerName}" placeholder="请输入客户姓名" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="identityCode">身份证号码:</label>
                 <input type="text" class="form-control" name="identityCode" id="identityCode" th:value="${entity.identityCode}" placeholder="请输入身份证号码" />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="contactNumber">联系电话:</label>
                 <input type="text" class="form-control" name="contactNumber" id="contactNumber" th:value="${entity.contactNumber}" placeholder="请输入联系电话" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="workCompany">工作单位:</label>
                 <input type="text" class="form-control" name="workCompany" id="workCompany" th:value="${entity.workCompany}" placeholder="请输入工作单位" />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="houseType">房屋性质:</label>
                 <input type="text" class="form-control" name="houseType" id="houseType" th:value="${entity.houseType}" placeholder="请输入房屋性质" />
             </div>
-
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="jzFqQs">分期期数:</label>
                 <input type="text" class="form-control" name="jzFqQs" id="jzFqQs" th:value="${entity.jzFqQs}" placeholder="请输入分期期数" />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="jzFqRate">费率:</label>
                 <input type="text" class="form-control" name="jzFqRate" id="jzFqRate" th:value="${entity.jzFqRate}" placeholder="请输入费率" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="jzFqMoney">分期金额:</label>
                 <input type="text" class="form-control" name="jzFqMoney" id="jzFqMoney" th:value="${entity.jzFqMoney}" placeholder="请输入分期金额" />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="jzSpMoney"><span style="color:red;">*</span>审批金额:</label>
                 <input type="text" class="form-control" name="jzSpMoney" id="jzSpMoney" th:value="${entity.jzSpMoney}" placeholder="请输入调额金额" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="passDate"><span style="color:red;">*</span>通过时间:</label>
                 <input type="text" class="form-control" name="passDate" id="passDate"  readonly/>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="firstTeMoney">一次调额金额:</label>
                 <input type="text" class="form-control" name="firstTeMoney" id="firstTeMoney" th:value="${entity.firstTeMoney}"/>
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="firstTeTime">一次调额时间:</label>
                 <input type="text" class="form-control" name="firstTeTime" id="firstTeTime"  placeholder="请选择一次调额时间" readonly/>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="firstZyFlag">一次调额支用标识:</label>
                 <input type="text" class="form-control" name="firstZyFlag" id="firstZyFlag" th:value="${entity.firstZyFlag}"/>
             </div>
-
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="secondTeMoney">二次调额金额:</label>
                 <input type="text" class="form-control" name="secondTeMoney" id="secondTeMoney" th:value="${entity.secondTeMoney}"/>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="secondTeTime">二次调额时间:</label>
                 <input type="text" class="form-control" name="secondTeTime" id="secondTeTime"  placeholder="请选择二次调额时间" readonly/>
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="secondZyFlag">二次调额支用标识:</label>
                 <input type="text" class="form-control" name="secondZyFlag" id="secondZyFlag" th:value="${entity.secondZyFlag}"/>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="surplusMoney">剩余可用额度:</label>
                 <input type="text" class="form-control" name="surplusMoney" id="surplusMoney" th:value="${entity.surplusMoney}"  placeholder="请输入剩余可用额度"/>
             </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="bankZyMoney">行方支用金额:</label>
+                <input type="text" class="form-control" name="bankZyMoney" id="bankZyMoney" th:value="${entity.bankZyMoney}"  placeholder="请输入行方支用金额"/>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="bankZyZSMoney">行方支用中收:</label>
+                <input type="text" class="form-control" name="bankZyZSMoney" id="bankZyZSMoney" th:value="${entity.bankZyZSMoney}"/>
+            </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="edEndTime">额度失效时间:</label>
                 <input type="text" class="form-control" name="edEndTime" id="edEndTime" placeholder="请选择额度失效时间" readonly/>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="cardNumber">卡号:</label>
                 <input type="text" class="form-control" name="cardNumber" id="cardNumber" th:value="${entity.cardNumber}" placeholder="请输入卡号" />
             </div>
-
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="governor">主管:</label>
                 <input type="text" class="form-control" name="governor" id="governor" th:value="${entity.governor}" placeholder="请输入主管" />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="acceptorg">受理机构:</label>
                 <input type="text" class="form-control" name="acceptorg" id="acceptorg" th:value="${entity.acceptorg}" placeholder="请输入受理机构" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="yxqd">营销机构:</label>
                 <input type="text" class="form-control" name="yxqd" id="yxqd" th:value="${entity.yxqd}" placeholder="请输入营销机构" />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="isGd">是否归档:</label>
                 <input type="text" class="form-control" name="isGd" id="isGd" th:value="${entity.isGd}" placeholder="请输入是否归档" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="guidangDate">归档时间:</label>
                 <input type="text" class="form-control" name="guidangDate" id="guidangDate" placeholder="请选择归档时间" readonly/>
@@ -142,6 +240,7 @@
         setDateValue("secondTeTime",[[${entity.secondTeTime}]]);
         setDateValue("edEndTime",[[${entity.edEndTime}]]);
         setDateValue("guidangDate",[[${entity.guidangDate}]]);
+        setDateValue("importTime",[[${entity.importTime}]]);
 
         //加载网点信息下拉框
         loadBankInfoSelectOption("bankInfoId",[[${entity.bankInfoId}]]);
@@ -316,11 +415,29 @@
                     }
                 },
                 surplusMoney:{
-                    message: '剩余可用金额无效',
+                    message: '剩余可用额度无效',
                     validators: {
                         regexp: {
                             regexp: /^[0-9]+(.[0-9]{1,2})?$/,
                             message: '剩余可用金额格式错误'
+                        }
+                    }
+                },
+                bankZyMoney:{
+                    message: '行方支用金额无效',
+                    validators: {
+                        regexp: {
+                            regexp: /^[0-9]+(.[0-9]{1,2})?$/,
+                            message: '行方支用金额格式错误'
+                        }
+                    }
+                },
+                bankZyZSMoney:{
+                    message: '行方支用中收',
+                    validators: {
+                        regexp: {
+                            regexp: /^[0-9]+(.[0-9]{1,2})?$/,
+                            message: '行方支用中收格式错误'
                         }
                     }
                 }

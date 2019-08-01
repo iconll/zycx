@@ -5,8 +5,8 @@
     <div class="row">
         <div class="col-md-12">
             <div class="form-group" >
-                <label for="userName">名字:</label>
-                <input type="text" class="form-control" name="userName" id="userName" th:value="${entity.userName}"  placeholder="请输入名字" />
+                <label for="userName">用户姓名:</label>
+                <input type="text" class="form-control" name="userName" id="userName" th:value="${entity.userName}"  placeholder="请输入用户姓名" />
             </div>
             <div class="form-group">
                 <label for="login">账号:</label>
@@ -56,15 +56,15 @@
             },
             fields: {
                 userName: {
-                    message: '名字验证失败',
+                    message: '用户姓名验证失败',
                     validators: {
                         notEmpty: {
-                            message: '名字不能为空'
+                            message: '用户姓名不能为空'
                         } ,
                         stringLength: {
                             min: 2,
                             max: 30,
-                            message: '名字长度必须在2到30之间'
+                            message: '用户姓名长度必须在2到30之间'
                         }
                     }
                 },
@@ -75,11 +75,11 @@
                             message: '账号不能为空'
                         },
                         stringLength: {
-                            min: 6,
-                            max: 30,
-                            message: '账号长度必须在6到30之间'
+                            min: 3,
+                            max: 15,
+                            message: '账号长度必须在3到15之间'
                         },
-                        threshold :  6 , //有6字符以上才发送ajax请求，（input中输入一个字符，插件会向服务器发送一次，设置限制，6字符以上才开始）
+                        threshold :  3 , //有6字符以上才发送ajax请求，（input中输入一个字符，插件会向服务器发送一次，设置限制，6字符以上才开始）
                         remote: {//ajax验证。server result:{"valid",true or false} 向服务发送当前input name值，获得一个json数据。例表示正确：{"valid",true}
                             url: "user/isExist",//验证地址
                             data:function(validator) {// 获取需要传送到后台的验证的数据
@@ -90,6 +90,10 @@
                             message: '账号已存在',//提示消息
                             delay :  500,//每输入一个字符，就发ajax请求，服务器压力还是太大，设置2秒发送一次ajax（默认输入一个字符，提交一次，服务器压力太大）
                             type: 'POST'//请求方式
+                        },
+                        regexp: {
+                            regexp: /^[a-zA-Z][a-zA-Z0-9]{2,15}$/,
+                            message: '账号格式错误！'
                         }
                     }
                 },

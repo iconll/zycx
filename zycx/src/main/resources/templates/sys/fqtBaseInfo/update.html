@@ -2,73 +2,130 @@
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
 <body>
 <form id="fqtBaseInfoForm"  role="form" method="post" action="fqtBaseInfo/update">
+    <input type="hidden" name="id"  th:value="${entity.id}" />
+    <input type="hidden" name="source"  th:value="${entity.source}" />
+    <input type="hidden" name="recordPerson"  th:value="${entity.recordPerson}" />
+    <input type="hidden" name="importTime" id="importTime" />
     <div class="row">
-        <div class="col-md-12">
-            <input type="hidden" name="id"  th:value="${entity.id}" />
-            <input type="hidden" name="source"  th:value="${entity.source}" />
-            <input type="hidden" name="record_person"  th:value="${entity.recordPerson}" />
-            <input type="hidden" name="import_time"  th:value="${entity.importTime}" />
+        <div class="col-md-6">
             <div class="form-group" >
                 <label for="applyCode"><span style="color:red;">*</span>申请编码:</label>
                 <input type="text" class="form-control" name="applyCode" id="applyCode" th:value="${entity.applyCode}"  placeholder="请输入申请编码" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="salesman"><span style="color:red;">*</span>营销员姓名:</label>
                 <input type="text" class="form-control" name="salesman" id="salesman" th:value="${entity.salesman}" placeholder="请输入营销员姓名" />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="bankInfoId"><span style="color:red;">*</span>网点名称:</label>
                 <select name = "bankInfoId" id = "bankInfoId" class="form-control"></select>
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
-
                 <label for="jjTime">进件时间:</label>
                 <input type="text" class="form-control" name="jjTime" id="jjTime" readonly />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="customerName">客户姓名:</label>
                 <input type="text" class="form-control" name="customerName" id="customerName" th:value="${entity.customerName}" placeholder="请输入客户姓名" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="identityCode">身份证号码:</label>
                 <input type="text" class="form-control" name="identityCode" id="identityCode" th:value="${entity.identityCode}" placeholder="请输入身份证号码" />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="contactNumber">联系电话:</label>
                 <input type="text" class="form-control" name="contactNumber" id="contactNumber" th:value="${entity.contactNumber}" placeholder="请输入联系电话" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="fqqs">分期期数:</label>
                 <input type="text" class="form-control" name="fqqs" id="fqqs" th:value="${entity.fqqs}" placeholder="请输入分期期数" />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="fqRate">费率:</label>
                 <input type="text" class="form-control" name="fqRate" id="fqRate" th:value="${entity.fqRate}" placeholder="请输入费率" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="fqMoney">分期金额:</label>
                 <input type="text" class="form-control" name="fqMoney" id="fqMoney" th:value="${entity.fqMoney}" placeholder="请输入分期金额" />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="teTime"><span style="color:red;">*</span>调额时间:</label>
                 <input type="text" class="form-control" name="teTime" id="teTime"  readonly/>
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="teMoney"><span style="color:red;">*</span>调额金额:</label>
                 <input type="text" class="form-control" name="teMoney" id="teMoney" th:value="${entity.teMoney}" placeholder="请输入调额金额" />
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="surplusMoney"><span style="color:red;">*</span>剩余可用金额:</label>
                 <input type="text" class="form-control" name="surplusMoney" id="surplusMoney" th:value="${entity.surplusMoney}" placeholder="请输入剩余可用金额" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="disburseMoney">支用金额:</label>
                 <input type="text" class="form-control" name="disburseMoney" id="disburseMoney" th:value="${entity.disburseMoney}" readonly/>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="bankZyMoney">行方支用金额:</label>
+                <input type="text" class="form-control" name="bankZyMoney" id="bankZyMoney" th:value="${entity.bankZyMoney}"/>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="bankZyZSMoney">行方支用中收:</label>
+                <input type="text" class="form-control" name="bankZyZSMoney" id="bankZyZSMoney" th:value="${entity.bankZyZSMoney}"/>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="cardNumber">卡号:</label>
                 <input type="text" class="form-control" name="cardNumber" id="cardNumber" th:value="${entity.cardNumber}" placeholder="请输入卡号" />
             </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="expiryDate">额度失效时间:</label>
                 <input type="text" class="form-control" name="expiryDate" id="expiryDate" readonly />
@@ -83,6 +140,7 @@
         setDateValue("jjTime",[[${entity.jjTime}]]);
         setDateValue("teTime",[[${entity.teTime}]]);
         setDateValue("expiryDate",[[${entity.expiryDate}]]);
+        setDateValue("importTime",[[${entity.importTime}]]);
 
         //加载网点信息下拉框
         loadBankInfoSelectOption("bankInfoId",[[${entity.bankInfoId}]]);
@@ -214,6 +272,24 @@
                         regexp: {
                             regexp: /^[0-9]+(.[0-9]{1,2})?$/,
                                 message: '剩余可用金额格式错误'
+                        }
+                    }
+                },
+                bankZyMoney:{
+                    message: '行方支用金额',
+                    validators: {
+                        regexp: {
+                            regexp: /^[0-9]+(.[0-9]{1,2})?$/,
+                            message: '行方支用金额格式错误'
+                        }
+                    }
+                },
+                bankZyZSMoney:{
+                    message: '行方支用中收',
+                    validators: {
+                        regexp: {
+                            regexp: /^[0-9]+(.[0-9]{1,2})?$/,
+                            message: '行方支用中收格式错误'
                         }
                     }
                 },

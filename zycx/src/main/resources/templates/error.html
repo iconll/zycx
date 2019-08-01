@@ -5,16 +5,6 @@
     <title>404</title>
     <script src="../js/jquery.js"></script>
     <script type="text/javascript">
-        $(function() {
-            var wait = document.getElementById('wait'), href = document.getElementById('href').href;
-            var interval = setInterval(function() {
-                var time = --wait.innerHTML;
-                if (time <= 0) {
-                    clearInterval(interval);
-                    toMainHtml();
-                }
-            }, 1000);
-        });
         function toMainHtml(){
             window.parent.location.href = 'main';
         }
@@ -26,7 +16,7 @@
         <div class="in">
             <div class="textThis">
                 <h3>出错啦,请稍后重新尝试！</h3>
-                <p><span>页面自动<a id="href" href="#" onclick="toMainHtml();">跳转</a></span><span>等待<b id="wait">5</b>秒</span></p>
+                <p><span><a id="href" href="#" onclick="toMainHtml()">跳转首页</a></span></p>
             </div>
         </div>
     </div>

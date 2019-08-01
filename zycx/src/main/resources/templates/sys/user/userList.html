@@ -7,8 +7,8 @@
             <div class="panel-body">
                 <form class="form-inline" role="form" style="float: left; width: 100%;margin-left: 20px;" method="post" id="queryUser">
                     <div class="form-group">
-                        <label for="userName">名字:</label>
-                        <input type="text" class="form-control" name="userName" id="userName"  placeholder="请输入名字" />
+                        <label for="userName">用户姓名:</label>
+                        <input type="text" class="form-control" name="userName" id="userName"  placeholder="请输入用户姓名" />
                     </div>
                     <div class="form-group">
                         <label for="login">账号:</label>
@@ -91,6 +91,8 @@
                             window.Ewin.alert({message:'请选择一条需要修改的数据!'});
                             return false;
                         }
+                        console.log(rows[0]);
+                        console.log(rows[0].id);
                         window.Ewin.dialog({title:"修改",url:"user/updatePage?id="+rows[0].id,width:600,height:595});
                     }
                 },
