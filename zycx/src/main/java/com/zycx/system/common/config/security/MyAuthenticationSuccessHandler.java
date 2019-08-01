@@ -1,5 +1,7 @@
 package com.zycx.system.common.config.security;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.zycx.system.sys.controller.ExcelManageController;
 import com.zycx.system.sys.dao.UserDao;
 import com.zycx.system.sys.entity.User;
@@ -11,12 +13,14 @@ import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -40,7 +44,8 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         logger.info("登录成功");
         logger.info("username=>" + request.getParameter("username"));
-
+        logger.info("移动端 or PC端访问标示 type=>" + request.getParameter("type"));
+        String flag=request.getParameter("type");
         try{
             User user = (User)authentication.getPrincipal();
 
@@ -54,7 +59,6 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
                     //如果登录过，就把上一次的登录时间设置到最后一次登录时间
                     beforeLoginDate = lastLoginDate;
                 }
-
                 //每次登录都更新登录时间
                 user.setLastLoginDate(new Date());
 
@@ -67,7 +71,17 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
         }catch(Exception e){
             logger.error( "MyAuthenticationSuccessHandler.onAuthenticationSuccess Exception:" + e);
         }
-
-        redirectStrategy.sendRedirect(request, response, "/main");
+        if(flag!=null && flag.equals("move")){
+            //移动端登录成功后跳转的地址
+            JSONObject json =new JSONObject();
+            json.put("resultMsg"," success");
+            PrintWriter out = response.getWriter();
+            out.write(json.toJSONString());
+            out.flush();
+            out.close();
+        }else{
+            //网页端登录成功后跳转的地址
+            redirectStrategy.sendRedirect(request, response, "/main");
+        }
     }
 }

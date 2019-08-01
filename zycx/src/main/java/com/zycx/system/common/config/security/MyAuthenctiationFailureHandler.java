@@ -1,6 +1,10 @@
 package com.zycx.system.common.config.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -9,7 +13,6 @@ import org.springframework.stereotype.Component;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
@@ -18,17 +21,20 @@ import java.io.IOException;
  * @author gly
  * @date 2019/04/16
  */
-//@Component
+@Component
 public class MyAuthenctiationFailureHandler implements AuthenticationFailureHandler {
 
     private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-
+     @Autowired
+    private ObjectMapper objectMapper;
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
-        HttpSession session = request.getSession();
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException,UsernameNotFoundException {
 
-        session.setAttribute("errorMsg",e.getMessage());
-        session.setAttribute("error",true);
-        redirectStrategy.sendRedirect(request, response, "/login");
-    }
+          //有提示，不跳转
+//         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+//         response.setContentType("application/json;charset=utf-8");
+//         response.getWriter().write(objectMapper.writeValueAsString(e.getMessage()));
+           //无提示直接跳转
+         redirectStrategy.sendRedirect(request, response, "/login?error=true");
+        }
 }

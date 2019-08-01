@@ -3,6 +3,7 @@ package com.zycx.system.common.config;
 import com.zycx.system.common.config.date.DateConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
@@ -15,6 +16,19 @@ import java.io.File;
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
+    /**
+     * 跨域
+     * @param registry
+     */
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                //.allowedOrigins("*","http://localhost:8001/")//Vue 项目的服务地址和端口号 可用*号代替
+                .allowedOrigins("*")//Vue 项目的服务地址和端口号 可用*号代替
+                .allowCredentials(true)
+                .allowedMethods("GET", "POST")//, "DELETE", "PUT"
+                .maxAge(3600);
+    }
 
     //日期转化器配置
     @Override
@@ -28,6 +42,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
      */
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
+
         registry.addViewController("/login").setViewName("login");
         registry.addViewController("/error").setViewName("error");
         registry.addViewController("/home").setViewName("home");

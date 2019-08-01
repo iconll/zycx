@@ -9,8 +9,10 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.cors.CorsUtils;
 
 import javax.annotation.Resource;
 
@@ -37,8 +39,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private MyAuthenticationSuccessHandler authenticationSuccessHandler;
-
-
+    @Autowired
+    private MyAuthenctiationFailureHandler authenctiationFailureHandler;
     @Override
     protected AuthenticationManager authenticationManager() throws Exception {
         return super.authenticationManager();
@@ -69,20 +71,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.headers().frameOptions().disable();
+        http.authorizeRequests().requestMatchers(CorsUtils::isPreFlightRequest).permitAll(); //放行option 请求
         http.csrf().disable().authorizeRequests()
                 .anyRequest().authenticated()
                 .and()
+
                 .formLogin()
-                .successHandler(authenticationSuccessHandler)
                 .loginPage("/login")
-                //.defaultSuccessUrl("/toMain")登录成功默认跳转页面
-                .failureUrl("/login?error=true")
-                //.failureHandler(authenctiationFailureHandler)自定义登录失败处理方法
+                .successHandler(authenticationSuccessHandler)
+
+                //.failureUrl("/login?error=true")
+                .failureHandler(authenctiationFailureHandler) //自定义登录失败处理方法
                 .permitAll()
+
                 .and()
                 .logout()
-                .logoutSuccessUrl("/login").
-                permitAll();
+                .logoutSuccessUrl("/login").permitAll()
+                ;
     }
 
 }
