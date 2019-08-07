@@ -72,22 +72,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.headers().frameOptions().disable();
         http.authorizeRequests().requestMatchers(CorsUtils::isPreFlightRequest).permitAll(); //放行option 请求
+        http.authorizeRequests().antMatchers("/PassVisit/**").anonymous();//允许匿名用户访问
         http.csrf().disable().authorizeRequests()
-                .anyRequest().authenticated()
-                .and()
+        .anyRequest().authenticated()
+        .and()
+        .formLogin()
+        .loginPage("/login")
+        .successHandler(authenticationSuccessHandler)
+        //.failureUrl("/login?error=true")
+        .failureHandler(authenctiationFailureHandler) //自定义登录失败处理方法
+        .permitAll()
+        .and()
+        .logout()
+        .logoutSuccessUrl("/login").permitAll()
+        ;
 
-                .formLogin()
-                .loginPage("/login")
-                .successHandler(authenticationSuccessHandler)
-
-                //.failureUrl("/login?error=true")
-                .failureHandler(authenctiationFailureHandler) //自定义登录失败处理方法
-                .permitAll()
-
-                .and()
-                .logout()
-                .logoutSuccessUrl("/login").permitAll()
-                ;
     }
 
 }
